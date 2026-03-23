@@ -1,0 +1,2742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Designing for AI</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=DM+Serif+Display&display=swap');
+
+  @font-face {
+    font-family: 'Manychat Gravity';
+    src: url('ManychatGravity_1812148010.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --purple: #9B8FFF;
+    --purple-deep: #6C5CE7;
+    --blue: #0066FF;
+    --blue-light: #00AAFF;
+    --red: #FF3B30;
+    --orange: #FF6B35;
+    --bg: #08080F;
+    --text: #FFFFFF;
+    --text-dim: rgba(255,255,255,0.45);
+    --text-mid: rgba(255,255,255,0.7);
+    --glass: rgba(255,255,255,0.06);
+    --glass-border: rgba(255,255,255,0.08);
+    --radius: 24px;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+  }
+
+  body::before {
+    display: none;
+  }
+
+  #progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--purple), var(--blue-light));
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+    z-index: 100;
+  }
+
+  #counter {
+    position: fixed;
+    bottom: 28px; right: 36px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-dim);
+    letter-spacing: .08em;
+    z-index: 100;
+    user-select: none;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .nav-btn {
+    position: fixed;
+    bottom: 20px;
+    background: none;
+    border: 1px solid var(--glass-border);
+    border-radius: 50%;
+    width: 36px; height: 36px;
+    cursor: pointer;
+    color: var(--text-dim);
+    opacity: .7;
+    transition: opacity .2s, background .2s;
+    z-index: 100;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-btn:hover { opacity: 1; background: var(--glass); }
+  #btn-prev { left: 36px; }
+  #btn-next { left: 82px; }
+
+  #presentation {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 80px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .6s cubic-bezier(.4,0,.2,1), transform .6s cubic-bezier(.4,0,.2,1);
+    transform: translateY(20px) scale(0.98);
+    overflow-y: auto;
+  }
+  /* Presentation slides (not chat) render inside a card */
+  .slide.pres-slide {
+    inset: 40px;
+    background: #0a0a1a;
+    border: 1px solid rgba(80,80,255,0.08);
+    border-radius: 24px;
+    padding: 56px 64px;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  .slide.pres-slide::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -20%;
+    width: 80%;
+    height: 100%;
+    background: radial-gradient(ellipse at center,
+      rgba(60,50,255,0.8) 0%,
+      rgba(80,60,255,0.5) 20%,
+      rgba(100,80,255,0.25) 40%,
+      rgba(60,40,200,0.08) 60%,
+      transparent 75%
+    );
+    filter: blur(50px);
+    pointer-events: none;
+    z-index: 0;
+    animation: blob-drift 12s ease-in-out infinite;
+  }
+  .slide.pres-slide::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -20%;
+    width: 60%;
+    height: 70%;
+    background: radial-gradient(ellipse at center,
+      rgba(80,50,255,0.4) 0%,
+      rgba(60,40,220,0.2) 30%,
+      rgba(40,30,180,0.08) 50%,
+      transparent 70%
+    );
+    filter: blur(60px);
+    pointer-events: none;
+    z-index: 0;
+    animation: blob-drift-2 15s ease-in-out infinite;
+  }
+  .slide.pres-slide > * {
+    position: relative;
+    z-index: 1;
+  }
+  @keyframes blob-drift {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(-3%, 5%) scale(1.05); }
+    66% { transform: translate(2%, -3%) scale(0.97); }
+  }
+  @keyframes blob-drift-2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    40% { transform: translate(4%, -3%) scale(1.03); }
+    70% { transform: translate(-2%, 4%) scale(0.98); }
+  }
+  .slide.pres-slide.slide-purple {
+    background: #0a0a1a;
+  }
+  .slide.pres-slide.slide-purple::before {
+    background: radial-gradient(ellipse at center,
+      rgba(108,92,231,0.9) 0%,
+      rgba(108,92,231,0.5) 20%,
+      rgba(155,143,255,0.25) 40%,
+      rgba(108,92,231,0.08) 60%,
+      transparent 75%
+    );
+  }
+  .slide.pres-slide.slide-purple::after {
+    background: radial-gradient(ellipse at center,
+      rgba(108,92,231,0.5) 0%,
+      rgba(80,60,200,0.25) 30%,
+      transparent 65%
+    );
+  }
+  .slide.pres-slide.slide-blue {
+    background: #0a0a1a;
+  }
+  .slide.pres-slide.slide-blue::before {
+    background: radial-gradient(ellipse at center,
+      rgba(0,100,255,0.8) 0%,
+      rgba(0,120,238,0.5) 20%,
+      rgba(0,170,255,0.25) 40%,
+      rgba(0,100,200,0.08) 60%,
+      transparent 75%
+    );
+  }
+  .slide.pres-slide.slide-blue::after {
+    background: radial-gradient(ellipse at center,
+      rgba(0,100,255,0.4) 0%,
+      rgba(0,80,200,0.2) 30%,
+      transparent 65%
+    );
+  }
+  .slide.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateY(0) scale(1);
+  }
+  .slide.exit {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.98);
+  }
+  .slide-inner {
+    width: 100%;
+    max-width: 900px;
+    margin: auto 0;
+  }
+  /* Full width inside the card */
+  .pres-slide .slide-inner {
+    max-width: 100%;
+  }
+
+  /* ── Section Dividers ── */
+  .section-divider {
+    text-align: left;
+  }
+  .section-number {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--purple);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(48px, 7vw, 80px);
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+    letter-spacing: -.03em;
+    margin-bottom: 20px;
+  }
+  .section-desc {
+    font-size: 17px;
+    color: var(--text-dim);
+    max-width: 500px;
+    line-height: 1.5;
+  }
+
+  /* ── Before/After Grid ── */
+  .ba-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .ba-head {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 16px 24px;
+  }
+  .ba-head-before {
+    background: rgba(255,255,255,0.03);
+    color: var(--text-dim);
+    border-right: 1px solid rgba(255,255,255,0.06);
+  }
+  .ba-head-after {
+    background: rgba(155,143,255,0.06);
+    color: var(--purple);
+  }
+  .ba-row {
+    display: contents;
+  }
+  .ba-cell {
+    padding: 18px 24px;
+    font-size: 16px;
+    line-height: 1.45;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .ba-before {
+    color: var(--text-dim);
+    border-right: 1px solid rgba(255,255,255,0.06);
+  }
+  .ba-after {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* ── Image slides ── */
+  .image-slide-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--purple);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .image-slide-title {
+    font-size: clamp(22px, 2.5vw, 30px);
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 32px;
+    line-height: 1.3;
+  }
+  .image-placeholder {
+    width: 100%;
+    border-radius: 16px;
+    border: 1px dashed rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.02);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 40px;
+    color: var(--text-dim);
+    font-size: 14px;
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  /* ── Gradient Cards ── */
+  .grad-card {
+    border-radius: var(--radius);
+    padding: 44px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .grad-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+  .grad-blue {
+    background: linear-gradient(160deg, #1a0a5e 0%, #0044cc 40%, #0077ee 70%, rgba(0,170,255,0.4) 100%);
+  }
+  .grad-red {
+    background: linear-gradient(160deg, #660022 0%, #cc0033 35%, #ff3b30 65%, #ff6b35 100%);
+  }
+  .grad-purple {
+    background: linear-gradient(160deg, #1a0a3e 0%, #4a2a8e 40%, #6C5CE7 70%, #9B8FFF 100%);
+  }
+
+  /* ── Floating animations ── */
+  @keyframes pulse { 0%,100% { opacity: .2; } 50% { opacity: .7; } }
+  @keyframes float-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  @keyframes float-med { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  @keyframes float-subtle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+  @keyframes float-rotate { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-6px) rotate(0.5deg); } }
+  @keyframes glow-pulse { 0%, 100% { box-shadow: 0 0 60px rgba(108,92,231,0.12); } 50% { box-shadow: 0 0 100px rgba(108,92,231,0.22); } }
+  @keyframes glow-pulse-red { 0%, 100% { box-shadow: 0 0 60px rgba(255,59,48,0.12); } 50% { box-shadow: 0 0 100px rgba(255,59,48,0.22); } }
+
+  /* ── Typography ── */
+  .slide-heading {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 8px;
+    letter-spacing: -.02em;
+    line-height: 1.05;
+  }
+  .slide-subheading {
+    font-size: clamp(15px, 1.8vw, 19px);
+    color: var(--text-dim);
+    margin-bottom: 44px;
+    font-weight: 400;
+    line-height: 1.5;
+  }
+  .label-sm {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+
+  /* ── Slide 1: Title ── */
+  #slide-1 { text-align: center; }
+  #slide-1 .main-title {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(64px, 12vw, 130px);
+    font-weight: 800;
+    letter-spacing: -.04em;
+    line-height: .9;
+    margin-bottom: 32px;
+    background: linear-gradient(135deg, #fff 0%, var(--purple) 50%, var(--blue-light) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: float-rotate 5.5s ease-in-out infinite;
+  }
+  #slide-1 .subtitle {
+    font-size: clamp(16px, 2.2vw, 22px);
+    color: var(--text-dim);
+    font-weight: 400;
+    margin-bottom: 56px;
+    max-width: 500px;
+    line-height: 1.5;
+  }
+  #slide-1 .byline {
+    font-size: 12px;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  #slide-1 .hint {
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    color: rgba(255,255,255,0.15);
+    letter-spacing: .12em;
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+
+  /* ── Slide 2: Sources ── */
+  .source-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .source-card {
+    border-radius: 18px;
+    padding: 28px 22px;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.02);
+    transition: border-color .25s, transform .25s;
+    animation: float-subtle 6s ease-in-out infinite;
+  }
+  .source-card:nth-child(1) { animation-delay: 0s; }
+  .source-card:nth-child(2) { animation-delay: 0.6s; }
+  .source-card:nth-child(3) { animation-delay: 1.2s; }
+  .source-card:hover {
+    border-color: rgba(155,143,255,0.3);
+    transform: translateY(-3px);
+  }
+  .source-card-label {
+    font-size: 10px; font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .source-card-title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    line-height: 1.25;
+  }
+  .source-card-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  /* ── Quote blocks ── */
+  .quote-block {
+    font-size: clamp(22px, 3.2vw, 36px);
+    font-weight: 700;
+    line-height: 1.35;
+    color: #fff;
+    margin: 28px 0 24px;
+  }
+  .quote-sub {
+    font-size: 15px;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.6;
+  }
+  .quote-attribution {
+    font-size: 12px;
+    color: rgba(255,255,255,0.3);
+    margin-top: 20px;
+    font-style: italic;
+  }
+  .source-line {
+    font-size: 10px;
+    color: rgba(255,255,255,0.25);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  /* ── Two Columns ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 12px;
+  }
+  .col-card {
+    border-radius: 18px;
+    padding: 32px 28px;
+  }
+  .col-card.muted {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .col-card.highlighted {
+    background: linear-gradient(160deg, rgba(108,92,231,0.2), rgba(155,143,255,0.08));
+    border: 1px solid rgba(155,143,255,0.25);
+  }
+  .col-card h3 {
+    font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .12em;
+    margin-bottom: 22px;
+  }
+  .col-card.highlighted h3 { color: var(--purple); }
+  .col-card.muted h3 { color: var(--text-dim); }
+  .col-card ul {
+    list-style: none;
+    display: flex; flex-direction: column;
+    gap: 14px;
+    font-size: 15px; line-height: 1.5;
+    color: var(--text-mid);
+  }
+  .col-card.highlighted ul { color: rgba(255,255,255,0.8); }
+  .col-label {
+    text-align: right;
+    font-size: 12px; color: var(--purple);
+    font-weight: 600; margin-top: 16px;
+    font-style: italic;
+    opacity: .7;
+  }
+
+  /* ── Points list ── */
+  .points-list {
+    list-style: none;
+    display: flex; flex-direction: column;
+    gap: 24px;
+    margin-top: 8px;
+  }
+  .points-list li { transition: opacity .4s, transform .4s; }
+  .js-ready .points-list li { opacity: 0; transform: translateY(14px); }
+  .js-ready .points-list li.visible { opacity: 1; transform: translateY(0); }
+  .point-title {
+    font-size: clamp(17px, 2vw, 21px);
+    font-weight: 700; margin-bottom: 4px;
+  }
+  .point-title span {
+    background: linear-gradient(90deg, var(--purple), var(--blue-light));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .point-body {
+    font-size: clamp(14px, 1.5vw, 16px);
+    color: var(--text-dim); line-height: 1.5;
+  }
+
+  /* ── Content Cards Grid ── */
+  .content-cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 8px;
+  }
+  .content-cards-grid.three-col {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  .content-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 24px;
+    transition: opacity .4s, transform .4s;
+  }
+  .js-ready .content-card {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  .js-ready .content-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .content-card-title {
+    font-size: clamp(16px, 1.8vw, 20px);
+    font-weight: 700;
+    margin-bottom: 8px;
+    background: linear-gradient(90deg, var(--purple), var(--blue-light));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .content-card-body {
+    font-size: clamp(13px, 1.4vw, 15px);
+    color: var(--text-dim);
+    line-height: 1.55;
+  }
+
+  /* ── Research ── */
+  .research-hero {
+    border-radius: 20px;
+    padding: 32px 36px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+    animation: glow-pulse-red 4s ease-in-out infinite, float-slow 5s ease-in-out infinite;
+  }
+  .research-hero::after {
+    content: '';
+    position: absolute;
+    top: -50%; right: -30%;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(255,255,255,0.06), transparent 70%);
+    pointer-events: none;
+  }
+  .research-hero-eyebrow {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 12px;
+  }
+  .research-hero-text {
+    font-size: clamp(18px, 2.4vw, 26px);
+    font-weight: 700; line-height: 1.35;
+    margin-bottom: 12px;
+    color: #fff;
+  }
+  .research-hero-source {
+    font-size: 10px; color: rgba(255,255,255,0.35);
+    font-style: italic;
+  }
+  .trend-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .trend-card {
+    padding: 22px 20px;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    background: rgba(255,255,255,0.02);
+    transition: opacity .4s, transform .4s;
+  }
+  .js-ready .trend-card { opacity: 0; transform: translateY(10px); }
+  .js-ready .trend-card.visible { opacity: 1; transform: translateY(0); }
+  .trend-card-title {
+    font-size: 15px; font-weight: 700;
+    margin-bottom: 6px; color: #fff;
+  }
+  .trend-card-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .trend-source {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 9px; font-weight: 600;
+    color: var(--purple);
+    background: rgba(155,143,255,0.1);
+    border-radius: 20px;
+    padding: 2px 10px;
+  }
+
+  /* ── Patterns grid ── */
+  .patterns-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-top: 8px;
+  }
+  .pattern-card {
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 24px 20px;
+    background: rgba(255,255,255,0.02);
+    transition: border-color .25s, background .25s, transform .25s;
+    cursor: default;
+    animation: float-subtle 6s ease-in-out infinite;
+  }
+  .pattern-card:nth-child(1) { animation-delay: 0s; }
+  .pattern-card:nth-child(2) { animation-delay: 0.8s; }
+  .pattern-card:nth-child(3) { animation-delay: 1.6s; }
+  .pattern-card:nth-child(4) { animation-delay: 0.4s; }
+  .pattern-card:nth-child(5) { animation-delay: 1.2s; }
+  .pattern-card:nth-child(6) { animation-delay: 2.0s; }
+  .pattern-card:hover {
+    border-color: rgba(155,143,255,0.3);
+    background: rgba(155,143,255,0.06);
+    animation-play-state: paused;
+    transform: translateY(-3px);
+  }
+  .pattern-name {
+    font-size: 15px; font-weight: 700;
+    margin-bottom: 8px; color: #fff;
+  }
+  .pattern-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  /* ── Three col / Own cards ── */
+  .three-col {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .own-card {
+    border-radius: 18px;
+    padding: 28px 22px;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.02);
+    transition: border-color .25s, transform .25s;
+    animation: float-med 5s ease-in-out infinite;
+  }
+  .own-card:nth-child(1) { animation-delay: 0s; }
+  .own-card:nth-child(2) { animation-delay: 0.7s; }
+  .own-card:nth-child(3) { animation-delay: 1.4s; }
+  .own-card:hover {
+    border-color: rgba(155,143,255,0.3);
+    animation-play-state: paused;
+    transform: translateY(-3px);
+  }
+  .own-card-label {
+    font-size: 10px; font-weight: 800;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .own-card-label.intention { color: var(--purple); }
+  .own-card-label.autonomy { color: var(--blue-light); }
+  .own-card-label.adaptation { color: var(--orange); }
+  .own-card-title {
+    font-size: clamp(16px, 1.8vw, 19px);
+    font-weight: 700;
+    margin-bottom: 10px;
+    line-height: 1.25;
+  }
+  .own-card-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.55;
+  }
+  .anchor-bar {
+    background: linear-gradient(135deg, rgba(108,92,231,0.12), rgba(0,102,255,0.08));
+    border-left: 3px solid var(--purple);
+    border-radius: 0 14px 14px 0;
+    padding: 20px 28px;
+    font-size: clamp(14px, 1.5vw, 16px);
+    line-height: 1.6;
+    color: var(--text-mid);
+  }
+  .anchor-bar strong { color: var(--purple); font-weight: 700; }
+
+  /* ── Team Actions ── */
+  .team-rows {
+    display: flex; flex-direction: column;
+    margin-top: 8px;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 18px;
+    overflow: hidden;
+  }
+  .team-row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: opacity .4s, transform .4s;
+  }
+  .js-ready .team-row { opacity: 0; transform: translateY(10px); }
+  .js-ready .team-row.visible { opacity: 1; transform: translateY(0); }
+  .team-row:last-child { border-bottom: none; }
+  .team-context {
+    background: rgba(255,255,255,0.02);
+    font-size: 11px; font-weight: 700;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    padding: 22px 20px;
+    display: flex; align-items: center;
+    border-right: 1px solid rgba(255,255,255,0.04);
+  }
+  .team-action {
+    padding: 22px 26px;
+    font-size: clamp(14px, 1.5vw, 16px);
+    line-height: 1.5;
+    display: flex; align-items: center;
+    color: var(--text-mid);
+  }
+  .team-action strong { color: var(--purple); }
+
+  /* ── Closing ── */
+  #slide-15 { text-align: center; }
+  .closing-quote {
+    font-size: clamp(22px, 3vw, 34px);
+    font-weight: 700;
+    line-height: 1.45;
+    color: #fff;
+    max-width: 700px;
+    margin: 0 auto 40px;
+  }
+  .closing-quote .word {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity .35s, transform .35s;
+  }
+  .closing-quote .word.visible { opacity: 1; transform: translateY(0); }
+  .closing-quote-wrap {
+    border-left: 3px solid var(--purple);
+    border-right: 3px solid var(--purple);
+    padding: 36px 48px;
+    background: linear-gradient(135deg, rgba(108,92,231,0.08), rgba(0,102,255,0.04));
+    border-radius: 18px;
+    margin: 40px 0 40px;
+    animation: float-slow 6s ease-in-out infinite;
+  }
+  .closing-thanks {
+    font-size: 16px;
+    color: var(--text-dim);
+    margin-top: 8px;
+  }
+  .closing-accent {
+    width: 60px; height: 3px;
+    background: linear-gradient(90deg, var(--purple), var(--blue-light));
+    border-radius: 2px;
+    margin: 28px auto 0;
+  }
+
+  /* ── Slide 1: AI Chat Interface ── */
+  #slide-1 {
+    background: var(--bg);
+    padding: 0;
+  }
+  #slide-1 .slide-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+  .chat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 6px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-mid);
+    margin-bottom: 28px;
+  }
+  .chat-badge svg { flex-shrink: 0; stroke: var(--text-mid); }
+  .chat-greeting {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(32px, 4vw, 40px);
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -.02em;
+    line-height: 1.1;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .chat-greeting .spark {
+    font-size: clamp(28px, 4vw, 42px);
+    line-height: 1;
+  }
+  .chat-input-card {
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border-radius: 20px;
+    border: 1px solid transparent;
+    background-image: linear-gradient(var(--bg), var(--bg)), linear-gradient(135deg, #EDE6FF, var(--purple), var(--purple-deep));
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    padding: 16px 20px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: box-shadow .3s;
+    box-shadow: 0 0 20px rgba(155,143,255,0.15), 0 0 60px rgba(108,92,231,0.08);
+  }
+  .chat-input-card:focus-within {
+    box-shadow: 0 0 30px rgba(155,143,255,0.25), 0 0 80px rgba(108,92,231,0.12);
+  }
+  .chat-input {
+    width: 100%;
+    background: none;
+    border: none;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    color: #fff;
+    padding: 0;
+    caret-color: var(--purple);
+    line-height: 1.5;
+    resize: none;
+    overflow: hidden;
+    min-height: 24px;
+    max-height: 150px;
+  }
+  .chat-input::placeholder {
+    color: rgba(255,255,255,0.25);
+  }
+  .chat-input-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .chat-plus-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.12);
+    background: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--text-dim);
+    font-size: 18px;
+    transition: border-color .2s;
+  }
+  .chat-plus-btn:hover { border-color: rgba(255,255,255,0.3); }
+  .chat-right-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .chat-model-select {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: default;
+  }
+  .chat-model-select svg { opacity: .5; }
+  .chat-send-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: var(--purple);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: #fff;
+    font-size: 14px;
+    transition: background .2s, transform .2s;
+    opacity: .25;
+    transition: opacity .2s;
+  }
+  .chat-send-btn.active {
+    opacity: 1;
+  }
+  .chat-send-btn.active:hover { transform: scale(1.05); }
+  .chat-mic-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-dim);
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color .2s;
+  }
+  .chat-mic-btn:hover { color: var(--text-mid); }
+  .chat-voice-btn {
+    background: #fff;
+    border: none;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity .2s;
+  }
+  .chat-voice-btn:hover { opacity: .8; }
+
+  /* Suggestion chip */
+  .chat-suggestion {
+    margin-top: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-dim);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: background .2s, border-color .2s, color .2s;
+  }
+  .chat-suggestion:hover {
+    background: rgba(155,143,255,0.08);
+    border-color: rgba(155,143,255,0.2);
+    color: var(--text-mid);
+  }
+  .chat-suggestion-icon {
+    opacity: .4;
+  }
+  .slide1-bubble {
+    margin-top: 20px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .3s, transform .3s;
+  }
+  .slide1-bubble.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Thinking overlay */
+  .ai-thinking-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: calc(50vh - 220px);
+    background: var(--bg);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .4s;
+  }
+  .ai-thinking-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .thinking-icon {
+    display: none;
+  }
+  @keyframes thinking-pulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(108,92,231,0.3); }
+    50% { transform: scale(1.08); box-shadow: 0 0 40px 10px rgba(108,92,231,0.15); }
+  }
+  .thinking-text {
+    font-size: 13px;
+    color: var(--text-dim);
+    font-weight: 500;
+    margin-bottom: 20px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+  .thinking-steps {
+    position: relative;
+    width: 100%;
+    max-width: 700px;
+    text-align: left;
+    margin-top: 24px;
+    height: 80px;
+  }
+  .thinking-step {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: clamp(18px, 2.4vw, 28px);
+    font-weight: 500;
+    color: var(--text-mid);
+    opacity: 0;
+    width: 100%;
+    line-height: 1.4;
+    overflow: hidden;
+    transition: opacity .4s;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .thinking-step.visible {
+    opacity: 1;
+  }
+  .thinking-step .typed-text {
+    display: inline;
+  }
+  .thinking-dots {
+    display: inline-flex;
+    gap: 4px;
+    margin-left: 4px;
+  }
+  .thinking-dots span {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.35);
+    animation: dot-bounce 1.4s ease-in-out infinite;
+  }
+  .thinking-dots span:nth-child(2) { animation-delay: .2s; }
+  .thinking-dots span:nth-child(3) { animation-delay: .4s; }
+  @keyframes dot-bounce {
+    0%, 80%, 100% { opacity: .3; transform: translateY(0); }
+    40% { opacity: 1; transform: translateY(-4px); }
+  }
+
+  /* ── Slide 2: Choice Sheet ── */
+  .choice-sheet {
+    margin-top: 0;
+    border: none;
+    border-radius: 18px;
+    padding: 12px 12px 4px;
+    background: rgba(255,255,255,0.02);
+    width: 100%;
+    text-align: left;
+  }
+  .choice-question {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    padding: 2px 4px;
+  }
+  .choice-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .choice-option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-bottom: none;
+    cursor: pointer;
+    transition: background .2s, opacity .4s, transform .4s;
+    border-radius: 10px;
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  .choice-option.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  #choice-sheet-1 .choice-option,
+  #confirm-card-inline .choice-option {
+    opacity: 1;
+    transform: none;
+  }
+  .choice-option { flex-wrap: wrap; }
+  .choice-option:last-child { }
+  .choice-option:hover {
+    background: rgba(255,255,255,0.04);
+  }
+  .choice-option.focus {
+    background: rgba(155,143,255,0.08);
+  }
+  .choice-num {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+  .choice-option.focus .choice-num {
+    background: rgba(155,143,255,0.15);
+    color: var(--purple);
+  }
+  .choice-label {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-mid);
+    text-align: left;
+  }
+  .choice-option.focus .choice-label {
+    color: var(--text);
+  }
+  .choice-desc {
+    font-size: 12px;
+    color: var(--text-dim);
+    width: 100%;
+    padding-left: 38px;
+    margin-top: -2px;
+    order: 3;
+  }
+  .choice-option.focus .choice-desc {
+    color: rgba(255,255,255,0.5);
+  }
+  .choice-arrow {
+    font-size: 14px;
+    color: var(--text-dim);
+    opacity: 0;
+    transition: opacity .2s;
+    order: 2;
+    margin-left: auto;
+    align-self: center;
+  }
+  .choice-option.focus .choice-arrow {
+    opacity: 1;
+  }
+  .choice-hints {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    margin-top: 16px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.2);
+    opacity: 0;
+    transition: opacity .4s;
+  }
+  .choice-hints.show {
+    opacity: 1;
+  }
+  .choice-bottom-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 2px;
+    padding-top: 0;
+    opacity: 0;
+    transition: opacity .4s;
+  }
+  .choice-bottom-row.show {
+    opacity: 1;
+  }
+  .choice-skip-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 6px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: background .2s, color .2s;
+    font-family: 'Inter', sans-serif;
+    margin-left: auto;
+  }
+  .choice-skip-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: var(--text-mid);
+  }
+  .choice-response {
+    margin-top: 24px;
+    font-size: clamp(16px, 1.8vw, 20px);
+    font-weight: 500;
+    color: var(--text-mid);
+    line-height: 1.5;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .4s, transform .4s;
+  }
+  .choice-response.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .choice-response-text {
+    display: inline;
+  }
+  /* ── Chat thread ── */
+  .chat-thread {
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    opacity: 0;
+    transition: opacity .4s;
+  }
+  .chat-thread.show {
+    opacity: 1;
+  }
+  .chat-msg-user {
+    align-self: flex-end;
+    background: rgba(255,255,255,0.08);
+    border-radius: 18px;
+    padding: 12px 22px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--text);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .4s, transform .4s;
+    width: auto !important;
+    max-width: 80% !important;
+  }
+  .chat-msg-user.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .chat-msg-ai {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .4s, transform .4s;
+    text-align: left;
+  }
+  .chat-msg-ai.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .chat-ai-text {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(17px, 1.8vw, 20px);
+    font-weight: 500;
+    color: var(--text-mid);
+    line-height: 1.55;
+    margin-bottom: 20px;
+  }
+  .chat-area {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: justify-content 0s;
+    width: 100%;
+  }
+  .chat-area.chat-started {
+    justify-content: flex-start;
+    padding-top: 40px;
+  }
+  /* Force all chat children to same width */
+  .chat-area > *,
+  .chat-messages > *,
+  .chat-msg-ai > *,
+  .chat-bottom > *,
+  .choice-sheet,
+  .confirm-card,
+  .choice-hints,
+  .thinking-inline,
+  .thinking-steps-inline,
+  .chat-agenda {
+    max-width: 100% !important;
+    width: 100%;
+  }
+  .chat-greeting-wrap {
+    text-align: center !important;
+    padding: 0;
+    margin-bottom: -60px;
+    transition: opacity .3s, transform .3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .chat-greeting-wrap.hidden {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  .chat-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    opacity: 0;
+    transition: opacity .4s;
+    text-align: left;
+    width: 100%;
+  }
+  .chat-messages.show { opacity: 1; }
+  .chat-bottom {
+    flex-shrink: 0;
+    padding: 16px 0 20px;
+    transition: all .3s;
+    width: 100%;
+  }
+  .chat-bottom.initial {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, 20px);
+    width: 100%;
+    max-width: 900px;
+    padding: 0 80px;
+  }
+  .thinking-inline {
+    opacity: 0;
+    transition: opacity .4s;
+  }
+  .thinking-inline.show { opacity: 1; }
+  .thinking-inline {
+    width: 100%;
+  }
+  .thinking-text-inline {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-dim);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .thinking-spinner {
+    display: flex;
+    animation: spin 1.5s linear infinite;
+  }
+  .thinking-text-inline.done .thinking-spinner { display: none; }
+  .thinking-steps-inline {
+    position: relative;
+    width: 100%;
+    min-height: 60px;
+  }
+  .thinking-step-inline {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: clamp(16px, 1.6vw, 18px);
+    font-weight: 500;
+    color: var(--text-mid);
+    width: 100%;
+    line-height: 1.5;
+    opacity: 0;
+    transition: opacity .4s;
+  }
+  .thinking-step-inline.visible {
+    opacity: 1;
+  }
+  .thinking-step-inline .typed-text { display: inline; }
+  .think-highlight {
+    text-decoration: underline;
+    text-decoration-color: var(--purple);
+    text-underline-offset: 4px;
+    text-decoration-thickness: 2px;
+    color: var(--text);
+  }
+  .thinking-text-inline.done .thinking-dots { display: none; }
+  .chat-ai-icon {
+    font-size: 18px;
+    color: var(--purple);
+    margin-bottom: 12px;
+  }
+  .chat-agenda {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .chat-agenda-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity .4s, transform .4s;
+  }
+  .chat-agenda-item.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .chat-agenda-num {
+    width: 24px; height: 24px;
+    border-radius: 7px;
+    background: rgba(155,143,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    color: var(--purple);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .chat-agenda-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .chat-agenda-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+  .chat-ai-followup {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(17px, 1.8vw, 20px);
+    font-weight: 500;
+    color: var(--text);
+    opacity: 0;
+    transition: opacity .4s;
+  }
+  .chat-ai-followup.show {
+    opacity: 1;
+  }
+  .chat-ai-subtext {
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--text-dim);
+    line-height: 1.5;
+    margin-bottom: 24px;
+  }
+  .typing-indicator {
+    display: inline-flex;
+    gap: 4px;
+    padding: 12px 0;
+    opacity: 0;
+    transition: opacity .3s;
+  }
+  .typing-indicator.show { opacity: 1; }
+  .typing-indicator span {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    animation: dot-bounce 1.4s ease-in-out infinite;
+  }
+  .typing-indicator span:nth-child(2) { animation-delay: .2s; }
+  .typing-indicator span:nth-child(3) { animation-delay: .4s; }
+  .chat-ai-direction-followup {
+    font-size: 14px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  /* ── Direction list ── */
+  .direction-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 20px;
+    padding: 8px 32px;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+  }
+  .direction-card {
+    padding: 24px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 1.2s ease, transform 1.2s ease;
+  }
+  .direction-card:last-child { border-bottom: none; padding-bottom: 40px; }
+  .direction-card.show {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity .4s, transform .3s;
+  }
+  .direction-card.show:hover {
+    transform: none;
+  }
+  .direction-card.show:hover .direction-card-title {
+    background: linear-gradient(135deg, #EDE6FF, var(--purple));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .direction-card-title {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(26px, 3vw, 32px);
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+  .direction-card-desc {
+    font-size: 15px;
+    color: rgba(255,255,255,0.3);
+    line-height: 1.5;
+  }
+
+  .source-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 28px;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+  }
+  .source-chips.show { opacity: 1; }
+  .source-chip {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-dim);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 5px 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .inline-choice {
+    margin-top: 12px;
+  }
+
+  .confirm-card {
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 18px;
+    padding: 12px;
+    background: rgba(255,255,255,0.02);
+    width: 100%;
+    text-align: left;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .4s, transform .4s;
+  }
+  .confirm-card.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .confirm-card .choice-option {
+    opacity: 1;
+    transform: none;
+  }
+  .confirm-structure {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .confirm-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 18px;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    background: rgba(255,255,255,0.02);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .4s, transform .4s;
+  }
+  .confirm-item.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .confirm-num {
+    width: 26px; height: 26px;
+    border-radius: 8px;
+    background: rgba(155,143,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    color: var(--purple);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .confirm-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .confirm-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+  .confirm-actions {
+    display: flex;
+    gap: 10px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .4s, transform .4s;
+  }
+  .confirm-actions.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .confirm-btn {
+    padding: 10px 24px;
+    border-radius: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .2s, transform .2s;
+  }
+  .confirm-yes {
+    background: var(--purple);
+    border: none;
+    color: #fff;
+  }
+  .confirm-yes:hover {
+    background: var(--purple-deep);
+    transform: scale(1.02);
+  }
+  .confirm-no {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text-dim);
+  }
+  .confirm-no:hover {
+    border-color: rgba(255,255,255,0.2);
+    color: var(--text-mid);
+  }
+
+  /* ── Build overlay ── */
+  .build-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .4s;
+  }
+  .build-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .build-content {
+    width: 90%;
+    max-width: 700px;
+    background: #141418;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 24px;
+    padding: 48px 48px 40px;
+    transform: scale(0.95);
+    transition: transform .4s cubic-bezier(.2,0,.1,1);
+  }
+  .build-overlay.active .build-content {
+    transform: scale(1);
+  }
+  .build-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-dim);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    margin-bottom: 36px;
+  }
+  .build-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .build-section {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(22px, 2.5vw, 28px);
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.25;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 1s ease, transform 1s ease;
+  }
+  .build-section.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .build-ready {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--purple);
+    margin-top: 36px;
+    opacity: 0;
+    transition: opacity .8s ease;
+  }
+  .build-ready.show {
+    opacity: 1;
+  }
+
+  .choice-loading {
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    color: var(--text-dim);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .4s, transform .4s;
+  }
+  .choice-loading.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .choice-loading-icon {
+    display: flex;
+    animation: spin 1.5s linear infinite;
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .choice-option.selected {
+    background: rgba(155,143,255,0.15);
+    transition: background .2s, transform .2s, opacity .4s;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 700px) {
+    .slide { padding: 40px 24px; }
+    .grad-card { padding: 32px 24px; }
+    .two-col, .three-col, .trend-grid, .source-cards { grid-template-columns: 1fr; }
+    .patterns-grid { grid-template-columns: 1fr 1fr; }
+    .team-row { grid-template-columns: 1fr; }
+    .team-context { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  }
+  @media (max-width: 480px) {
+    .patterns-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+<div id="counter">1 / 14</div>
+<button class="nav-btn" id="btn-prev" aria-label="Previous slide">&#8592;</button>
+<button class="nav-btn" id="btn-next" aria-label="Next slide">&#8594;</button>
+
+<div id="presentation">
+
+  <!-- ── SLIDE 1: Full Chat Interface ── -->
+  <section class="slide active" id="slide-1" data-slide="1">
+    <div class="slide-inner" style="display:flex; flex-direction:column; height:100%;">
+
+      <!-- Top: scrollable chat area -->
+      <div class="chat-area" id="chat-area">
+        <!-- Initial greeting (centered, will shift up after send) -->
+        <div class="chat-greeting-wrap" id="chat-greeting-wrap">
+          <div class="chat-greeting">Good afternoon, Dajung</div>
+        </div>
+
+        <!-- Chat messages (hidden initially, revealed after send) -->
+        <div class="chat-messages" id="chat-messages">
+          <!-- User message 1 -->
+          <div class="chat-msg-user" id="msg-user-1"></div>
+
+          <!-- AI thinking -->
+          <div class="chat-msg-ai" id="msg-ai-thinking">
+                        <div class="thinking-inline" id="thinking-inline">
+              <div class="thinking-text-inline"><span class="thinking-spinner"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2" stroke-linecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></span>Looking into your background</div>
+              <div class="thinking-steps-inline" id="thinking-steps-inline">
+                <div class="thinking-step-inline" data-text="Checking what you've been working on recently..."><span class="typed-text"></span></div>
+                <div class="thinking-step-inline" data-text="You've been designing for AI at Manychat since late 2024. You're focused on how users interact with AI-powered automation."><span class="typed-text"></span></div>
+                <div class="thinking-step-inline" data-text="You attended the Rosenfeld Designing with AI conference in 2025. That shaped a lot of how you think about this."><span class="typed-text"></span></div>
+                <div class="thinking-step-inline" data-text="You've been building an AI interaction playbook with Nick, Martin, and Hugo. And pushing to understand how AI changes the experience itself."><span class="typed-text"></span></div>
+                <div class="thinking-step-inline" data-text="I see a clear angle here."><span class="typed-text"></span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Typing indicator before direction -->
+          <div class="typing-indicator" id="typing-1"><span></span><span></span><span></span></div>
+          <!-- AI direction message (shown after thinking) -->
+          <div class="chat-msg-ai" id="msg-ai-direction" style="display:none;">
+            <p class="chat-ai-text" id="chat-ai-direction-intro"></p>
+            <div class="direction-cards" id="direction-cards">
+              <div class="direction-card" id="dir-card-1">
+                <div class="direction-card-title">Designing with AI</div>
+                <div class="direction-card-desc">Using AI to work faster. Your team's already here.</div>
+              </div>
+              <div class="direction-card" id="dir-card-2">
+                <div class="direction-card-title">Designing for AI</div>
+                <div class="direction-card-desc">Designing the AI behavior itself. This is where your Manychat work gets interesting.</div>
+              </div>
+            </div>
+            <div class="source-chips" id="source-chips-direction">
+              <div class="source-chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg> 3 sources</div>
+            </div>
+            <div class="choice-sheet inline-choice" id="choice-sheet-1" style="display:none;">
+              <div class="choice-question">Which side do you want to present?</div>
+              <div class="choice-options">
+                <div class="choice-option" data-choice="with"><span class="choice-num">1</span><span class="choice-label">Designing with AI</span><span class="choice-arrow">↵</span></div>
+                <div class="choice-option" data-choice="for"><span class="choice-num">2</span><span class="choice-label">Designing for AI</span><span class="choice-arrow">↵</span></div>
+                <div class="choice-option" data-choice="else"><span class="choice-num" style="font-size:14px;">✎</span><span class="choice-label" style="color:var(--text-dim);">Something else</span><span class="choice-arrow">↵</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI response after direction picked -->
+          <div class="chat-msg-user" id="msg-user-2" style="display:none;">Designing for AI</div>
+
+          <!-- Thinking for structure -->
+          <div class="chat-msg-ai" id="msg-ai-thinking-2" style="display:none;">
+            <div class="thinking-inline" id="thinking-inline-2">
+              <div class="thinking-text-inline"><span class="thinking-spinner"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2" stroke-linecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></span>Structuring your session</div>
+              <div class="thinking-steps-inline" id="thinking-steps-2">
+                <div class="thinking-step-inline" data-text="Focusing on Designing for AI..."><span class="typed-text"></span></div>
+                <div class="thinking-step-inline" data-text="Pulling from your Manychat work and the Rosenfeld conference..."><span class="typed-text"></span></div>
+                <div class="thinking-step-inline" data-text="Organizing into a 30-minute session..."><span class="typed-text"></span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Typing indicator before structure -->
+          <div class="typing-indicator" id="typing-2"><span></span><span></span><span></span></div>
+          <div class="chat-msg-ai" id="msg-ai-structure" style="display:none;">
+            <p class="chat-ai-text" id="chat-ai-headline"></p>
+            <div class="direction-cards" id="structure-cards">
+              <div class="direction-card structure-item" id="struct-1">
+                <div class="direction-card-title">What's shifting in our craft</div>
+                <div class="direction-card-desc">The paradigm change, why classical UX breaks, and the honest risks</div>
+              </div>
+              <div class="direction-card structure-item" id="struct-2">
+                <div class="direction-card-title">What we should be designing for</div>
+                <div class="direction-card-desc">Research findings, interaction patterns, and what's settled vs. in flux</div>
+              </div>
+              <div class="direction-card structure-item" id="struct-3">
+                <div class="direction-card-title">What we own now at Manychat</div>
+                <div class="direction-card-desc">Intention, autonomy, adaptation. And concrete changes for the team.</div>
+              </div>
+            </div>
+            <div class="source-chips" id="source-chips">
+              <div class="source-chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg> 7 sources</div>
+            </div>
+            <div class="choice-sheet inline-choice" id="confirm-card-inline" style="display:none;">
+              <div class="choice-question">Does this structure work?</div>
+              <div class="choice-options">
+                <div class="choice-option confirm-opt" data-confirm="yes"><span class="choice-num">1</span><span class="choice-label">Yes, build it</span><span class="choice-arrow">↵</span></div>
+                <div class="choice-option confirm-opt" data-confirm="adjust"><span class="choice-num">2</span><span class="choice-label">Let me adjust</span><span class="choice-arrow">↵</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom: pinned input / cards -->
+      <div class="chat-bottom initial" id="chat-bottom">
+        <div id="input-area">
+          <div class="chat-input-card">
+            <textarea class="chat-input" id="ai-input" rows="1" placeholder="What are you working on?" autocomplete="off" spellcheck="false"></textarea>
+            <div class="chat-input-bottom">
+              <button class="chat-plus-btn" aria-label="Attach">+</button>
+              <div class="chat-right-controls">
+                <button class="chat-mic-btn" id="ai-mic" aria-label="Microphone"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
+                <button class="chat-voice-btn" id="ai-voice" aria-label="Voice"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round"><line x1="4" y1="8" x2="4" y2="16"/><line x1="8" y1="5" x2="8" y2="19"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="16" y1="6" x2="16" y2="18"/><line x1="20" y1="9" x2="20" y2="15"/></svg></button>
+                <button class="chat-send-btn" id="ai-send" aria-label="Send" style="display:none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Build overlay -->
+  <div class="build-overlay" id="build-overlay">
+    <div class="build-content">
+      <div class="build-label" id="build-label"><span class="thinking-spinner"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2" stroke-linecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></span><span id="build-text">Building your session</span></div>
+      <div class="build-sections">
+        <div class="build-section" id="build-s1">What's shifting in our craft</div>
+        <div class="build-section" id="build-s2">What we should be designing for</div>
+        <div class="build-section" id="build-s3">What we own now at Manychat</div>
+      </div>
+      <div class="build-ready" id="build-ready">Ready.</div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 2: Title Card ── -->
+  <section class="slide pres-slide" id="slide-2" data-slide="2">
+    <div class="slide-inner" style="text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+      <h1 class="main-title" style="animation: float-rotate 5.5s ease-in-out infinite;">Designing<br>for AI</h1>
+      <p style="font-size:clamp(15px, 1.8vw, 19px); color:var(--text-dim); margin-bottom:48px; letter-spacing:.02em;">What's shifting &nbsp;·&nbsp; What to design for &nbsp;·&nbsp; What we own now</p>
+      <p style="font-size:13px; color:rgba(255,255,255,0.2); letter-spacing:.1em; text-transform:uppercase;">Dajung Cho &nbsp;·&nbsp; Manychat &nbsp;·&nbsp; 30 min</p>
+    </div>
+  </section>
+
+  <!-- ══ SLIDE 3: Part 1 divider ══ -->
+  <section class="slide pres-slide" id="slide-3" data-slide="3">
+    <div class="slide-inner section-divider">
+      <div class="section-number">Part 1 of 3</div>
+      <div class="section-title">What<br>changed</div>
+      <div class="section-desc">Why the rules we learned don't fully apply anymore.</div>
+    </div>
+  </section>
+
+  <!-- ══ SLIDE 4: This is not theoretical ══ -->
+  <section class="slide pres-slide" id="slide-4" data-slide="4">
+    <div class="slide-inner" style="display:flex; gap:40px; align-items:center;">
+      <div style="flex:0 0 40%;">
+        <h2 class="slide-heading">This is not theoretical</h2>
+        <p class="slide-subheading">Same question, three different AI products. Three different answers.</p>
+      </div>
+      <div style="flex:1; display:flex; flex-direction:column; gap:10px;">
+        <img src="Determinism is gone.1.png" style="width:100%; border-radius:12px; border:1px solid rgba(255,255,255,0.08);">
+        <img src="Determinism is gone.2.png" style="width:100%; border-radius:12px; border:1px solid rgba(255,255,255,0.08);">
+        <img src="Determinism is gone.3.png" style="width:100%; border-radius:12px; border:1px solid rgba(255,255,255,0.08);">
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ SLIDE 5: The shift is already here ══ -->
+  <section class="slide pres-slide" id="slide-5" data-slide="5">
+    <div class="slide-inner" style="display:flex; gap:40px; align-items:center;">
+      <div style="flex:0 0 40%;">
+        <h2 class="slide-heading">The shift is already here</h2>
+        <p class="slide-subheading" id="slide6-label">Same product. Two completely different design paradigms.</p>
+      </div>
+      <div style="flex:1; position:relative; min-height:300px;">
+        <div id="slide6-before" style="transition: opacity 0.6s ease, transform 0.6s ease;">
+          <p class="label-sm" style="color:rgba(255,255,255,0.3); margin:0 0 8px 0;">Before: Flow builder</p>
+          <img src="Zapier classic.png" style="width:100%; border-radius:12px; border:1px solid rgba(255,255,255,0.08);">
+        </div>
+        <div id="slide6-after" style="position:absolute; top:0; left:0; width:100%; opacity:0; transform:translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease;">
+          <p class="label-sm" style="color:rgba(255,255,255,0.3); margin:0 0 8px 0;">Now: AI agent</p>
+          <img src="zapier AI native.png" style="width:100%; border-radius:12px; border:1px solid rgba(255,255,255,0.08);">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ SLIDE 6: What broke ══ -->
+  <section class="slide pres-slide" id="slide-6" data-slide="6">
+    <div class="slide-inner" style="display:flex; flex-direction:column; justify-content:center; height:100%;">
+      <h2 class="slide-heading">What broke</h2>
+      <p class="slide-subheading">These are the assumptions I had to unlearn.</p>
+      <div class="content-cards-grid">
+        <div class="content-card">
+          <div class="content-card-title">Determinism is gone</div>
+          <div class="content-card-body">Same input, different output every time. You can't design one screen anymore. You're designing for a spectrum.</div>
+        </div>
+        <div class="content-card">
+          <div class="content-card-title">The interface isn't the product</div>
+          <div class="content-card-body">The model is the product. We're designing a layer over something we don't fully control.</div>
+        </div>
+        <div class="content-card">
+          <div class="content-card-title">Failure looks like success</div>
+          <div class="content-card-body">AI doesn't show a 404. It gives a confident wrong answer that looks perfect. Our users won't know it's wrong.</div>
+        </div>
+        <div class="content-card">
+          <div class="content-card-title">Context replaces navigation</div>
+          <div class="content-card-body">Users don't click through pages. The AI holds the context. Flows, menus, wizards. Might not exist soon.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ SLIDE 7: The real risk ══ -->
+  <section class="slide pres-slide slide-purple" id="slide-7" data-slide="7">
+    <div class="slide-inner" style="display:flex; flex-direction:column; justify-content:center; text-align:center;">
+      <p class="label-sm" style="color:rgba(255,255,255,0.4); margin-bottom:32px;">A question for the room</p>
+      <div style="font-size:clamp(28px, 4vw, 44px); font-weight:700; color:#fff; line-height:1.25; margin-bottom:40px; max-width:700px; margin-left:auto; margin-right:auto;">
+        What happens when AI sends the wrong message to a customer and nobody notices?
+      </div>
+      <div id="slide8-answer" style="opacity:0; transform:translateY(12px); transition: opacity 0.6s ease, transform 0.6s ease; max-width:600px; margin:0 auto;">
+        <p style="font-size:clamp(17px, 2vw, 20px); color:rgba(255,255,255,0.6); line-height:1.6;">
+          The user blames Manychat. Not the AI. Us.<br>That concern is what started this work.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ SLIDE 8: Fundamentals survive ══ -->
+  <section class="slide pres-slide slide-blue" id="slide-8" data-slide="8">
+    <div class="slide-inner" style="display:flex; flex-direction:column; justify-content:center; text-align:center;">
+      <p class="label-sm" style="color:rgba(255,255,255,0.4); margin-bottom:24px;">But here's what I keep coming back to</p>
+      <div style="font-size:clamp(32px, 4vw, 48px); font-weight:700; color:#fff; line-height:1.2; margin-bottom:24px;">
+        Fundamentals survive.
+      </div>
+      <p style="font-size:18px; color:rgba(255,255,255,0.6); line-height:1.6; max-width:500px; margin:0 auto;">
+        Problem framing. Product sense. Judgment. Taste.<br>Tools change weekly. These don't.
+      </p>
+    </div>
+  </section>
+
+  <!-- ══ SLIDE 9: Part 2 divider ══ -->
+  <section class="slide pres-slide" id="slide-9" data-slide="9">
+    <div class="slide-inner section-divider">
+      <div class="section-number">Part 2 of 3</div>
+      <div class="section-title">What to<br>design for</div>
+      <div class="section-desc">What we've been building since last year. Research, patterns, and the AI playbook taking shape at Manychat.</div>
+    </div>
+  </section>
+
+  <!-- ══ SLIDE 10: The spectrum ══ -->
+  <section class="slide pres-slide" id="slide-10" data-slide="10">
+    <div class="slide-inner">
+      <h2 class="slide-heading">Where we are, where we're going</h2>
+      <p class="slide-subheading">Four paradigms. Each one changes what designers do.</p>
+      <div style="display:flex; gap:2px; margin-top:16px;">
+        <div style="flex:1; background:var(--card-bg); border-radius:16px 0 0 16px; padding:20px; border:1px solid rgba(255,255,255,0.06); border-right:none;">
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:rgba(255,255,255,0.25); margin-bottom:10px;">Where we are</div>
+          <div style="font-size:clamp(15px, 1.6vw, 18px); font-weight:700; color:#fff; margin-bottom:8px;">Rule-based</div>
+          <div style="font-size:13px; color:var(--text-dim); line-height:1.5; margin-bottom:12px;">"If someone says pricing, send this message." The business owner builds every path. AI does exactly what it's told.</div>
+          <div style="font-size:12px; padding:6px 10px; background:rgba(255,255,255,0.04); border-radius:8px; color:rgba(255,255,255,0.35);">Designer designs <strong style="color:rgba(255,255,255,0.6);">screens</strong></div>
+        </div>
+        <div style="flex:1; background:var(--card-bg); padding:20px; border:1px solid rgba(255,255,255,0.06); border-right:none; border-left:none;">
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:rgba(255,255,255,0.25); margin-bottom:10px;">Emerging</div>
+          <div style="font-size:clamp(15px, 1.6vw, 18px); font-weight:700; color:#fff; margin-bottom:8px;">AI-assisted</div>
+          <div style="font-size:13px; color:var(--text-dim); line-height:1.5; margin-bottom:12px;">AI suggests: "People who ask about pricing usually ask about shipping next." The human still decides. AI makes them faster.</div>
+          <div style="font-size:12px; padding:6px 10px; background:rgba(255,255,255,0.04); border-radius:8px; color:rgba(255,255,255,0.35);">Designer designs <strong style="color:rgba(255,255,255,0.6);">suggestions</strong></div>
+        </div>
+        <div style="flex:1; background:var(--card-bg); padding:20px; border:1px solid rgba(255,255,255,0.06); border-right:none; border-left:none;">
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:rgba(108,92,231,0.6); margin-bottom:10px;">Building now</div>
+          <div style="font-size:clamp(15px, 1.6vw, 18px); font-weight:700; color:#fff; margin-bottom:8px;">Agentic</div>
+          <div style="font-size:13px; color:var(--text-dim); line-height:1.5; margin-bottom:12px;">AI notices a customer asked about a product, checks inventory, personalizes the response, and sends it. At 3am. Without asking.</div>
+          <div style="font-size:12px; padding:6px 10px; background:rgba(255,255,255,0.04); border-radius:8px; color:rgba(255,255,255,0.35);">Designer designs <strong style="color:rgba(255,255,255,0.6);">the guardrails</strong></div>
+        </div>
+        <div style="flex:1; background:var(--card-bg); border-radius:0 16px 16px 0; padding:20px; border:1px solid rgba(255,255,255,0.06); border-left:none;">
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:rgba(255,59,48,0.6); margin-bottom:10px;">Next</div>
+          <div style="font-size:clamp(15px, 1.6vw, 18px); font-weight:700; color:#fff; margin-bottom:8px;">AI-native</div>
+          <div style="font-size:13px; color:var(--text-dim); line-height:1.5; margin-bottom:12px;">User types: "Handle pricing questions for my store." AI generates the entire flow. The interface isn't a builder anymore. It's a prompt.</div>
+          <div style="font-size:12px; padding:6px 10px; background:rgba(255,255,255,0.04); border-radius:8px; color:rgba(255,255,255,0.35);">Designer designs <strong style="color:rgba(255,255,255,0.6);">the conversation</strong></div>
+        </div>
+      </div>
+      <div style="margin-top:16px; text-align:center;">
+        <p style="font-size:13px; color:rgba(255,255,255,0.2); letter-spacing:0.02em;">Generative AI powers all of this. It's the engine. These are the design paradigms we build around it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ SLIDE 11: Research ══ -->
+  <section class="slide pres-slide" id="slide-11" data-slide="11">
+    <div class="slide-inner">
+      <h2 class="slide-heading">What research is telling us</h2>
+      <p class="slide-subheading">What I've learned from research, conferences, and building AI features.</p>
+      <div class="patterns-grid">
+        <div class="pattern-card">
+          <div class="pattern-name">Reviewing AI work is harder than doing it yourself</div>
+          <div class="pattern-desc">When AI does 80-90% correctly, catching subtle errors is more cognitively exhausting than starting from scratch. "AI draft + human review" may be the worst pattern.</div>
+          <span class="trend-source">Tankelevitch et al. · CHI 2024</span>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-name">Users prefer control over capability</div>
+          <div class="pattern-desc">Given a choice between a more capable autonomous AI and a less capable controllable one, users choose control. Even when it produces worse results.</div>
+          <span class="trend-source">Google DeepMind + PAIR 2024</span>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-name">Failure recovery beats accuracy</div>
+          <div class="pattern-desc">AI that fails 20% but recovers gracefully is trusted more than AI that fails 5% silently. Error handling matters more than error prevention.</div>
+          <span class="trend-source">Microsoft Research 2024</span>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-name">Fluency causes dangerous over-trust</div>
+          <div class="pattern-desc">The more human the AI sounds, the less users verify its outputs. Even when warned. Conversational fluency is a double-edged sword.</div>
+          <span class="trend-source">Bucinca et al. · CHI 2024</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ SLIDE 12: AI Playbook ══ -->
+  <section class="slide pres-slide" id="slide-12" data-slide="12">
+    <div class="slide-inner" style="display:flex; flex-direction:column; justify-content:center; text-align:center;">
+      <p class="label-sm" style="color:rgba(255,255,255,0.4); margin-bottom:24px;">What we're doing about it</p>
+      <div style="font-size:clamp(28px, 3.5vw, 42px); font-weight:700; color:#fff; line-height:1.25; margin-bottom:16px;">
+        This started as a workshop.<br>Now it's a playbook.
+      </div>
+      <p style="font-size:clamp(16px, 1.8vw, 19px); color:rgba(255,255,255,0.5); line-height:1.6; max-width:600px; margin:0 auto 32px;">
+        Nick, Martin and I ran a pattern workshop last year to map what we were seeing across AI products. Hugo took everything and built it into a living design playbook.
+      </p>
+      <div>
+        <a href="https://hugocostamc.github.io/claude/aidesignplaybook/" target="_blank" style="display:inline-flex; align-items:center; gap:10px; background:rgba(108,92,231,0.15); border:1px solid rgba(108,92,231,0.3); border-radius:12px; padding:14px 24px; color:#9B8FFF; font-size:16px; font-weight:600; text-decoration:none; transition: background 0.2s;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Open the AI Design Playbook
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ SLIDE 13: Part 3 divider ══ -->
+  <section class="slide pres-slide" id="slide-13" data-slide="13">
+    <div class="slide-inner section-divider">
+      <div class="section-number">Part 3 of 3</div>
+      <div class="section-title">What changes<br>now</div>
+      <div class="section-desc">The Manychat questions we need to answer. Starting this quarter.</div>
+    </div>
+  </section>
+
+  <!-- ══ SLIDE 14: What we're doing ══ -->
+  <section class="slide pres-slide" id="slide-14" data-slide="14">
+    <div class="slide-inner">
+      <h2 class="slide-heading">What's not being designed right now</h2>
+      <p class="slide-subheading">These problems exist today at Manychat. Nobody owns them yet.</p>
+      <div class="team-rows">
+        <div class="team-row">
+          <div class="team-context">Recovery</div>
+          <div class="team-action"><strong>If AI sends a wrong DM to 10,000 subscribers at 3am, what's our recovery path?</strong> There isn't one. We need to design it.</div>
+        </div>
+        <div class="team-row">
+          <div class="team-context">Conflict</div>
+          <div class="team-action"><strong>When two automations contradict each other, what wins?</strong> We haven't decided. The AI will have to. Should it?</div>
+        </div>
+        <div class="team-row">
+          <div class="team-context">Surface</div>
+          <div class="team-action"><strong>The flow editor is our entire design surface. What if users stop needing it?</strong> We need to know what we're building next.</div>
+        </div>
+        <div class="team-row">
+          <div class="team-context">Oversight</div>
+          <div class="team-action"><strong>Who's reviewing what the AI actually says to end users?</strong> Not in staging. In production. Right now.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ SLIDE 15: Discussion ══ -->
+  <section class="slide pres-slide slide-purple" id="slide-15" data-slide="15">
+    <div class="slide-inner" style="text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+      <p class="label-sm" style="color:rgba(255,255,255,0.4); margin-bottom:24px;">One question to leave with</p>
+      <div style="font-size:clamp(28px, 4vw, 44px); font-weight:600; color:#fff; line-height:1.25; margin-bottom:36px; max-width:700px;">
+        If the flow editor disappears tomorrow, what would you design instead?
+      </div>
+      <p style="font-size:18px; color:rgba(255,255,255,0.5); line-height:1.6; margin-bottom:20px; max-width:550px;">
+        You watched AI build this presentation in real time. That's not the future. That's today. The question is what we do with it.
+      </p>
+      <p style="font-size:16px; color:rgba(255,255,255,0.35); line-height:1.6;">
+        Let's talk.
+      </p>
+    </div>
+  </section>
+
+  <!-- ══ SLIDE 16: Feedback ══ -->
+  <section class="slide pres-slide" id="slide-16" data-slide="16">
+    <div class="slide-inner" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
+      <p class="label-sm" style="color:rgba(255,255,255,0.4); margin-bottom:24px;">Thank you</p>
+      <div style="font-size:clamp(24px, 3vw, 36px); font-weight:700; color:#fff; line-height:1.3; margin-bottom:12px;">
+        Was this helpful?
+      </div>
+      <p style="font-size:16px; color:rgba(255,255,255,0.4); margin-bottom:36px;">Your feedback helps me make these better.</p>
+      <div style="display:flex; gap:16px;">
+        <button id="fb-up" onclick="document.getElementById('fb-up').style.background='rgba(108,92,231,0.3)';document.getElementById('fb-up').style.borderColor='rgba(108,92,231,0.5)';document.getElementById('fb-msg').style.opacity='1';document.getElementById('fb-msg').style.transform='translateY(0)';" style="display:flex; align-items:center; gap:10px; padding:16px 32px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; color:#fff; font-size:18px; cursor:pointer; transition: all 0.3s;">
+          <span style="font-size:24px;">&#128077;</span> Yes
+        </button>
+        <button id="fb-down" onclick="document.getElementById('fb-down').style.background='rgba(255,255,255,0.08)';document.getElementById('fb-down').style.borderColor='rgba(255,255,255,0.2);';document.getElementById('fb-msg').textContent='Thanks. I\'ll improve it.';document.getElementById('fb-msg').style.opacity='1';document.getElementById('fb-msg').style.transform='translateY(0)';" style="display:flex; align-items:center; gap:10px; padding:16px 32px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; color:#fff; font-size:18px; cursor:pointer; transition: all 0.3s;">
+          <span style="font-size:24px;">&#128078;</span> Not really
+        </button>
+      </div>
+      <p id="fb-msg" style="margin-top:24px; font-size:16px; color:rgba(108,92,231,0.8); opacity:0; transform:translateY(8px); transition: opacity 0.4s ease, transform 0.4s ease;">Thanks for the feedback.</p>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  const TOTAL = 16;
+  let current = 1;
+  let isAnimating = false;
+
+  const counter = document.getElementById('counter');
+  const progressBar = document.getElementById('progress-bar');
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+
+  const CLOSING_QUOTE = "The ocean surface is frothy and tumultuous. But the bottom is settled. Our job hasn't changed — understand people, frame the right problem, make the invisible visible. The tools changed. The judgment didn't. That's what we own.";
+
+  function getSlideEl(n) { return document.getElementById('slide-' + n); }
+
+  function updateProgress() {
+    progressBar.style.width = ((current / TOTAL) * 100) + '%';
+    counter.textContent = current + ' / ' + TOTAL;
+  }
+
+  function triggerSlideAnimations(slideEl, slideNum) {
+    if (slideNum === 2) {
+      const opts = slideEl.querySelectorAll('.choice-option');
+      const bottomRow = slideEl.querySelector('#choice-sheet-1 .choice-bottom-row');
+      const hints = slideEl.querySelector('.choice-hints');
+      opts.forEach((el, i) => {
+        el.classList.remove('show');
+        setTimeout(() => el.classList.add('show'), 400 + i * 200);
+      });
+      const afterOpts = 400 + opts.length * 200 + 100;
+      if (bottomRow) setTimeout(() => bottomRow.classList.add('show'), afterOpts);
+      if (hints) setTimeout(() => hints.classList.add('show'), afterOpts + 200);
+    }
+    // Content cards animation (What broke, Manychat specific)
+    if (slideNum === 6) {
+      slideEl.querySelectorAll('.content-card').forEach((el, i) => {
+        el.classList.remove('visible');
+        setTimeout(() => el.classList.add('visible'), 80 + i * 120);
+      });
+    }
+    // Team rows
+    if (slideNum === 14) {
+      slideEl.querySelectorAll('.team-row').forEach((el, i) => {
+        el.classList.remove('visible');
+        setTimeout(() => el.classList.add('visible'), 80 + i * 100);
+      });
+    }
+  }
+
+  // Slide 5 sub-step: before → after (Zapier)
+  let slide5step = 0;
+  function resetSlide5() {
+    slide5step = 0;
+    const before = document.getElementById('slide6-before');
+    const after = document.getElementById('slide6-after');
+    if (before) { before.style.opacity = ''; before.style.transform = ''; }
+    if (after) { after.style.opacity = '0'; after.style.transform = 'translateY(20px)'; }
+  }
+
+  // Slide 8 sub-step: question → answer reveal
+  let slide7step = 0;
+  function resetSlide7() {
+    slide7step = 0;
+    const answer = document.getElementById('slide8-answer');
+    if (answer) { answer.style.opacity = '0'; answer.style.transform = 'translateY(12px)'; }
+  }
+
+  function goTo(next) {
+    // Intercept forward on slide 5 for sub-step (Zapier before/after)
+    if (current === 5 && next === 6 && slide5step === 0) {
+      slide5step = 1;
+      const before = document.getElementById('slide6-before');
+      const after = document.getElementById('slide6-after');
+      before.style.opacity = '0';
+      before.style.transform = 'translateY(-20px)';
+      after.style.opacity = '1';
+      after.style.transform = 'translateY(0)';
+      return;
+    }
+    if (current === 5 && next === 4 && slide5step === 1) {
+      resetSlide5();
+      return;
+    }
+    if (current === 5) resetSlide5();
+
+    // Intercept forward on slide 8 for sub-step (question → answer)
+    if (current === 7 && next === 8 && slide7step === 0) {
+      slide7step = 1;
+      const answer = document.getElementById('slide8-answer');
+      answer.style.opacity = '1';
+      answer.style.transform = 'translateY(0)';
+      return;
+    }
+    if (current === 7 && next === 6 && slide7step === 1) {
+      resetSlide7();
+      return;
+    }
+    if (current === 7) resetSlide7();
+
+    if (isAnimating || next < 1 || next > TOTAL || next === current) return;
+    isAnimating = true;
+
+    const fromEl = getSlideEl(current);
+    const toEl = getSlideEl(next);
+
+    toEl.style.transform = next > current ? 'translateY(20px) scale(0.98)' : 'translateY(-20px) scale(0.98)';
+    toEl.style.opacity = '0';
+    toEl.classList.remove('exit');
+    toEl.style.pointerEvents = 'none';
+    toEl.offsetHeight;
+
+    fromEl.classList.remove('active');
+    fromEl.classList.add('exit');
+    toEl.classList.add('active');
+    toEl.style.transform = '';
+    toEl.style.opacity = '';
+    toEl.style.pointerEvents = '';
+
+    current = next;
+    if (current === 5) resetSlide5();
+    if (current === 7) resetSlide7();
+    updateProgress();
+    triggerSlideAnimations(toEl, current);
+
+    setTimeout(() => { fromEl.classList.remove('exit'); isAnimating = false; }, 620);
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goTo(current + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(current - 1); }
+  });
+  btnNext.addEventListener('click', () => goTo(current + 1));
+  btnPrev.addEventListener('click', () => goTo(current - 1));
+
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 50) { dx < 0 ? goTo(current + 1) : goTo(current - 1); }
+  });
+
+  // ── Unified Chat Flow (all on slide 1) ──
+  const aiInput = document.getElementById('ai-input');
+  const aiSend = document.getElementById('ai-send');
+  const chatArea = document.getElementById('chat-area');
+
+  function scrollChat() { chatArea.scrollTop = chatArea.scrollHeight; }
+
+  // Suggestion chip
+
+  // Auto-resize + swap icons
+  const micBtn = document.getElementById('ai-mic');
+  const voiceBtn = document.getElementById('ai-voice');
+  aiInput.addEventListener('input', () => {
+    const hasText = aiInput.value.trim().length > 0;
+    if (hasText) {
+      micBtn.style.display = 'none';
+      voiceBtn.style.display = 'none';
+      aiSend.style.display = '';
+      aiSend.classList.add('active');
+    } else {
+      micBtn.style.display = '';
+      voiceBtn.style.display = '';
+      aiSend.style.display = 'none';
+      aiSend.classList.remove('active');
+    }
+    aiInput.style.height = 'auto';
+    aiInput.style.height = aiInput.scrollHeight + 'px';
+  });
+  aiInput.addEventListener('keydown', (e) => {
+    e.stopPropagation();
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); startChat(); }
+  });
+  aiSend.addEventListener('click', startChat);
+
+  // ── Phase 1: User sends message → thinking → direction card ──
+  function startChat() {
+    const val = aiInput.value.trim();
+    if (!val) return;
+
+    // Set user bubble text
+    document.getElementById('msg-user-1').textContent = val;
+
+    // Hide greeting + input
+    const greeting = document.getElementById('chat-greeting-wrap');
+    const inputArea = document.getElementById('input-area');
+    greeting.classList.add('hidden');
+    inputArea.style.transition = 'opacity .3s';
+    inputArea.style.opacity = '0';
+
+    setTimeout(() => {
+      greeting.style.display = 'none';
+      inputArea.style.display = 'none';
+      chatArea.classList.add('chat-started');
+      document.getElementById('chat-bottom').classList.remove('initial');
+
+      // Show chat messages
+      const msgs = document.getElementById('chat-messages');
+      msgs.classList.add('show');
+      document.getElementById('msg-user-1').classList.add('show');
+      scrollChat();
+
+      // Show AI thinking inline
+      setTimeout(() => {
+        const thinking = document.getElementById('msg-ai-thinking');
+        thinking.classList.add('show');
+        document.getElementById('thinking-inline').classList.add('show');
+        scrollChat();
+
+        // Type each thinking step (with highlights)
+        const steps = document.querySelectorAll('#thinking-steps-inline .thinking-step-inline');
+        runInlineThinking(steps, () => {
+          // Hide entire thinking section (label + steps)
+
+          const thinkingEl = document.getElementById('msg-ai-thinking');
+          const dirMsg = document.getElementById('msg-ai-direction');
+          const dirIntro = document.getElementById('chat-ai-direction-intro');
+          const dirCard1 = document.getElementById('dir-card-1');
+          const dirCard2 = document.getElementById('dir-card-2');
+          const dirOutro = document.getElementById('chat-ai-direction-outro');
+          const introText = "There's a clear split in how designers are approaching AI right now.";
+
+          // Fade out thinking and show direction at the same time
+          thinkingEl.style.transition = 'opacity .3s';
+          thinkingEl.style.opacity = '0';
+          dirMsg.style.display = '';
+          dirMsg.style.opacity = '0';
+          dirMsg.style.transition = 'opacity .3s';
+
+          // Show typing indicator
+          const typing1 = document.getElementById('typing-1');
+          typing1.classList.add('show');
+          scrollChat();
+
+          setTimeout(() => {
+            thinkingEl.style.display = 'none';
+            thinkingEl.querySelectorAll('.thinking-step-inline').forEach(s => {
+              s.classList.remove('visible');
+              s.querySelector('.typed-text').innerHTML = '';
+            });
+            typing1.classList.remove('show');
+            typing1.style.display = 'none';
+            dirMsg.style.opacity = '1';
+            dirMsg.classList.add('show');
+            scrollChat();
+
+          // Type intro
+          let di = 0;
+          const dirInterval = setInterval(() => {
+            dirIntro.textContent = introText.slice(0, di + 1);
+            di++;
+            scrollChat();
+            if (di >= introText.length) {
+              clearInterval(dirInterval);
+              // Show cards staggered
+              setTimeout(() => { dirCard1.classList.add('show'); scrollChat(); }, 500);
+              setTimeout(() => { dirCard2.classList.add('show'); scrollChat(); }, 1200);
+              // Show source chip
+              setTimeout(() => { document.getElementById('source-chips-direction').classList.add('show'); scrollChat(); }, 1800);
+              // Show selection card inline
+              setTimeout(() => {
+                const sheet = document.getElementById('choice-sheet-1');
+                sheet.style.display = '';
+                sheet.style.opacity = '0';
+                sheet.style.transition = 'opacity 1.2s ease';
+                setTimeout(() => { sheet.style.opacity = '1'; }, 50);
+                scrollChat();
+              }, 2200);
+            }
+          }, 20);
+          }, 800);
+        });
+      }, 500);
+    }, 350);
+  }
+
+  function runInlineThinking(steps, callback) {
+    const isFirstThinking = steps[0] && steps[0].closest('#thinking-steps-inline') !== null;
+    const keywords = isFirstThinking ? [
+      'Manychat',
+      'since late 2024',
+      'Rosenfeld Designing with AI conference in 2025',
+      'how AI changes the experience itself'
+    ] : [];
+
+    let idx = 0;
+    function typeNext() {
+      if (idx >= steps.length) {
+        const parent = steps[0].closest('.thinking-inline');
+        if (parent) parent.querySelector('.thinking-text-inline').classList.add('done');
+        setTimeout(callback, 300);
+        return;
+      }
+      const step = steps[idx];
+      const rawText = step.getAttribute('data-text');
+      const span = step.querySelector('.typed-text');
+      span.innerHTML = '';
+
+      // Hide previous step
+      if (idx > 0) steps[idx - 1].classList.remove('visible');
+
+      step.classList.add('visible');
+      scrollChat();
+
+      if (keywords.length > 0) {
+        // Build highlighted segments
+        let markedText = rawText;
+        keywords.forEach(kw => {
+          markedText = markedText.replace(kw, '{{HL}}' + kw + '{{/HL}}');
+        });
+        const segments = [];
+        let inHL = false;
+        markedText.split(/({{HL}}|{{\/HL}})/).forEach(part => {
+          if (part === '{{HL}}') { inHL = true; return; }
+          if (part === '{{/HL}}') { inHL = false; return; }
+          for (const ch of part) segments.push({ ch, hl: inHL });
+        });
+
+        let ci = 0;
+        const interval = setInterval(() => {
+          let html = '';
+          let hlOpen = false;
+          for (let i = 0; i <= ci; i++) {
+            const seg = segments[i];
+            if (seg.hl && !hlOpen) { html += '<span class="think-highlight">'; hlOpen = true; }
+            if (!seg.hl && hlOpen) { html += '</span>'; hlOpen = false; }
+            html += seg.ch;
+          }
+          if (hlOpen) html += '</span>';
+          span.innerHTML = html;
+          ci++;
+          scrollChat();
+          if (ci >= segments.length) {
+            clearInterval(interval);
+            idx++;
+            setTimeout(typeNext, 400);
+          }
+        }, 25);
+      } else {
+        // Plain typing, no highlights
+        let ci = 0;
+        const interval = setInterval(() => {
+          span.textContent = rawText.slice(0, ci + 1);
+          ci++;
+          scrollChat();
+          if (ci >= rawText.length) {
+            clearInterval(interval);
+            idx++;
+            setTimeout(typeNext, 400);
+          }
+        }, 25);
+      }
+    }
+    setTimeout(typeNext, 600);
+  }
+
+  // ── Phase 2: Direction choice → AI structure → confirm ──
+  document.querySelectorAll('#choice-sheet-1 .choice-option').forEach(opt => {
+    opt.addEventListener('mouseenter', () => {
+      document.querySelectorAll('#choice-sheet-1 .choice-option').forEach(o => o.classList.remove('focus'));
+      opt.classList.add('focus');
+    });
+    opt.addEventListener('mouseleave', () => {
+      if (!opt.classList.contains('selected')) opt.classList.remove('focus');
+    });
+    opt.addEventListener('click', () => {
+      if (opt.dataset.choice !== 'for') return;
+      opt.classList.add('focus', 'selected');
+
+      // Hide all previous messages, show thinking then structure
+      setTimeout(() => {
+        // Hide all previous content completely
+        document.getElementById('msg-user-1').style.display = 'none';
+        const oldThinking = document.getElementById('msg-ai-thinking');
+        oldThinking.style.display = 'none';
+        oldThinking.querySelectorAll('.thinking-step-inline').forEach(s => {
+          s.classList.remove('visible');
+          s.querySelector('.typed-text').innerHTML = '';
+        });
+        document.getElementById('msg-ai-direction').style.display = 'none';
+        const sheet = document.getElementById('choice-sheet-1');
+        sheet.style.display = 'none';
+
+        chatArea.scrollTop = 0;
+
+        // Show user bubble
+        const user2 = document.getElementById('msg-user-2');
+        user2.style.display = '';
+        setTimeout(() => {
+          user2.classList.add('show');
+          chatArea.scrollTop = 0;
+
+          // Show thinking 2
+          const thinking2 = document.getElementById('msg-ai-thinking-2');
+          thinking2.style.display = '';
+          setTimeout(() => {
+            thinking2.classList.add('show');
+            document.getElementById('thinking-inline-2').classList.add('show');
+            scrollChat();
+
+            // Run thinking steps
+            const steps2 = document.querySelectorAll('#thinking-steps-2 .thinking-step-inline');
+            runInlineThinking(steps2, () => {
+              // Hide thinking 2
+              thinking2.style.transition = 'opacity .3s';
+              thinking2.style.opacity = '0';
+              setTimeout(() => { thinking2.style.display = 'none'; }, 300);
+
+              // Show typing then structure
+              const typing2 = document.getElementById('typing-2');
+              const aiStruct = document.getElementById('msg-ai-structure');
+              typing2.classList.add('show');
+              scrollChat();
+
+              setTimeout(() => {
+                typing2.classList.remove('show');
+                typing2.style.display = 'none';
+                aiStruct.style.display = '';
+                aiStruct.classList.add('show');
+                scrollChat();
+
+            // Type headline
+            const headline = document.getElementById('chat-ai-headline');
+            const headlineText = "Good choice. Here's how this builds as a 30-minute argument.";
+            let ci = 0;
+            const typeInt = setInterval(() => {
+              headline.textContent = headlineText.slice(0, ci + 1);
+              ci++;
+              scrollChat();
+              if (ci >= headlineText.length) {
+                clearInterval(typeInt);
+                // Stagger structure items
+                const items = document.querySelectorAll('.structure-item');
+                items.forEach((item, i) => {
+                  setTimeout(() => { item.classList.add('show'); scrollChat(); }, 500 + i * 700);
+                });
+                const afterItems = 500 + items.length * 700 + 300;
+                // Show source chips
+                setTimeout(() => {
+                  document.getElementById('source-chips').classList.add('show');
+                  scrollChat();
+                }, afterItems);
+                // Show confirm card inline
+                setTimeout(() => {
+                  const cc = document.getElementById('confirm-card-inline');
+                  cc.style.display = '';
+                  cc.style.opacity = '0';
+                  cc.style.transition = 'opacity 1.2s ease';
+                  setTimeout(() => { cc.style.opacity = '1'; }, 50);
+                  scrollChat();
+                }, afterItems + 600);
+              }
+            }, 20);
+              }, 800);
+            });
+          }, 500);
+        }, 200);
+      }, 400);
+    });
+  });
+
+  // ── Phase 3: Confirm → build → title card ──
+  document.querySelectorAll('.confirm-opt').forEach(opt => {
+    opt.addEventListener('mouseenter', () => {
+      document.querySelectorAll('.confirm-opt').forEach(o => o.classList.remove('focus'));
+      opt.classList.add('focus');
+    });
+    opt.addEventListener('mouseleave', () => {
+      if (!opt.classList.contains('selected')) opt.classList.remove('focus');
+    });
+    opt.addEventListener('click', () => {
+      if (opt.dataset.confirm !== 'yes') return;
+      opt.classList.add('focus', 'selected');
+
+      const buildOverlay = document.getElementById('build-overlay');
+      const buildText = document.getElementById('build-text');
+
+      setTimeout(() => buildOverlay.classList.add('active'), 400);
+
+      // Stagger sections appearing
+      setTimeout(() => document.getElementById('build-s1').classList.add('show'), 1000);
+      setTimeout(() => document.getElementById('build-s2').classList.add('show'), 1800);
+      setTimeout(() => document.getElementById('build-s3').classList.add('show'), 2600);
+
+      // Show "Ready."
+      setTimeout(() => {
+        document.querySelector('.build-label .thinking-spinner').style.display = 'none';
+        document.getElementById('build-text').textContent = 'Session ready';
+        document.getElementById('build-ready').classList.add('show');
+      }, 3400);
+
+      // Switch slide behind overlay
+      setTimeout(() => {
+        const fromEl = getSlideEl(1);
+        const toEl = getSlideEl(2);
+        fromEl.classList.remove('active');
+        toEl.classList.add('active');
+        toEl.style.transform = '';
+        toEl.style.opacity = '';
+        toEl.style.pointerEvents = '';
+        current = 2;
+        updateProgress();
+      }, 4000);
+
+      // Fade out overlay to reveal slide 2
+      setTimeout(() => {
+        buildOverlay.style.transition = 'opacity .8s ease';
+        buildOverlay.classList.remove('active');
+      }, 4500);
+    });
+  });
+
+  document.body.classList.add('js-ready');
+  updateProgress();
+</script>
+</body>
+</html>
