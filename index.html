@@ -139,9 +139,14 @@
     overflow-y: auto;
     container-type: inline-size;
   }
-  .slide.pres-slide > * {
+  .slide.pres-slide > *:not(.slide-header):not(.slide-footer) {
     position: relative;
     z-index: 1;
+  }
+  .slide.pres-slide > .slide-header,
+  .slide.pres-slide > .slide-footer {
+    width: 100%;
+    align-self: stretch;
   }
   .slide.active {
     opacity: 1;
@@ -730,6 +735,8 @@
     margin-top: 8px;
     border: 1px solid var(--card-border);
     border-radius: 18px;
+    width: 100%;
+    overflow: hidden;
     overflow: hidden;
   }
   .team-row {
@@ -753,10 +760,13 @@
   }
   .team-action {
     padding: 22px 26px;
-    font-size: 1.6cqi;
+    font-size: 1.4cqi;
     line-height: 1.5;
     display: flex; align-items: center;
     color: var(--text-secondary);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    min-width: 0;
   }
   .team-action strong { color: var(--accent-pink); }
 
@@ -1951,15 +1961,15 @@
       <span class="slide-header-name">DESIGNING FOR AI</span>
       <span class="slide-header-date">24TH MARCH 2026</span>
     </div>
-    <div class="slide-inner" style="display:flex; gap:40px; align-items:center;">
-      <div style="flex:0 0 40%;">
+    <div class="slide-inner" style="display:flex; gap:40px; align-items:center; height:100%;">
+      <div style="flex:0 0 35%;">
         <h2 class="slide-heading">This is not theoretical</h2>
         <p class="slide-subheading">Same question, three different AI products. Three different answers.</p>
       </div>
-      <div style="flex:1; display:flex; flex-direction:column; gap:10px;">
-        <img src="Determinism is gone.1.png" style="width:100%; border-radius:12px; border:1px solid var(--card-border);">
-        <img src="Determinism is gone.2.png" style="width:100%; border-radius:12px; border:1px solid var(--card-border);">
-        <img src="Determinism is gone.3.png" style="width:100%; border-radius:12px; border:1px solid var(--card-border);">
+      <div style="flex:1; display:flex; flex-direction:column; gap:6px; max-height:100%; overflow-y:auto;">
+        <img src="Determinism is gone.1.png" style="width:100%; border-radius:12px; border:1px solid var(--card-border); flex-shrink:0;">
+        <img src="Determinism is gone.2.png" style="width:100%; border-radius:12px; border:1px solid var(--card-border); flex-shrink:0;">
+        <img src="Determinism is gone.3.png" style="width:100%; border-radius:12px; border:1px solid var(--card-border); flex-shrink:0;">
       </div>
     </div>
     <div class="slide-footer">
