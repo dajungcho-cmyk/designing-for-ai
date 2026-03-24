@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,37 +7,52 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=DM+Serif+Display&display=swap');
 
-  @font-face {
-    font-family: 'Manychat Gravity';
-    src: url('ManychatGravity_1812148010.otf') format('opentype');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-  }
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --purple: #9B8FFF;
-    --purple-deep: #6C5CE7;
-    --blue: #0066FF;
-    --blue-light: #00AAFF;
-    --red: #FF3B30;
-    --orange: #FF6B35;
-    --bg: #08080F;
-    --text: #FFFFFF;
-    --text-dim: rgba(255,255,255,0.45);
-    --text-mid: rgba(255,255,255,0.7);
+  :root, [data-theme="dark"] {
+    --bg-primary: #0D0D0D;
+    --bg-secondary: #1A1A1A;
+    --text-primary: #FFFFFF;
+    --text-secondary: #B0B0B0;
+    --text-muted: #666666;
+    --accent-pink: #FF00FF;
+    --accent-blue: #3B9FFF;
+    --accent-orange: #FF4B00;
+    --accent-purple: #7B34CE;
+    --tag-bg: #FF00FF;
+    --tag-text: #1A1A1A;
+    --header-line: #333333;
+    --card-bg: #1A1A1A;
+    --card-border: rgba(255,255,255,0.08);
     --glass: rgba(255,255,255,0.06);
     --glass-border: rgba(255,255,255,0.08);
     --radius: 24px;
   }
 
+  [data-theme="light"] {
+    --bg-primary: #F5F3EE;
+    --bg-secondary: #EDEAE4;
+    --text-primary: #1A1A1A;
+    --text-secondary: #6B6B6B;
+    --text-muted: #999999;
+    --accent-pink: #FF00FF;
+    --accent-blue: #0084FF;
+    --accent-orange: #FF4B00;
+    --accent-purple: #7B34CE;
+    --tag-bg: #FF00FF;
+    --tag-text: #1A1A1A;
+    --header-line: #CCCCCC;
+    --card-bg: #EDEAE4;
+    --card-border: rgba(0,0,0,0.08);
+    --glass: rgba(0,0,0,0.04);
+    --glass-border: rgba(0,0,0,0.08);
+  }
+
   html, body {
     height: 100%;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--text);
+    background: var(--bg-primary);
+    color: var(--text-primary);
     overflow: hidden;
   }
 
@@ -49,21 +64,9 @@
     position: fixed;
     top: 0; left: 0;
     height: 2px;
-    background: linear-gradient(90deg, var(--purple), var(--blue-light));
+    background: var(--accent-pink);
     transition: width 0.5s cubic-bezier(.4,0,.2,1);
     z-index: 100;
-  }
-
-  #counter {
-    position: fixed;
-    bottom: 28px; right: 36px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-dim);
-    letter-spacing: .08em;
-    z-index: 100;
-    user-select: none;
-    font-variant-numeric: tabular-nums;
   }
 
   .nav-btn {
@@ -74,7 +77,7 @@
     border-radius: 50%;
     width: 36px; height: 36px;
     cursor: pointer;
-    color: var(--text-dim);
+    color: var(--text-muted);
     opacity: .7;
     transition: opacity .2s, background .2s;
     z-index: 100;
@@ -84,6 +87,26 @@
   .nav-btn:hover { opacity: 1; background: var(--glass); }
   #btn-prev { left: 36px; }
   #btn-next { left: 82px; }
+
+  .theme-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 36px;
+    background: none;
+    border: 1px solid var(--glass-border);
+    border-radius: 50%;
+    width: 36px; height: 36px;
+    cursor: pointer;
+    color: var(--text-muted);
+    opacity: .7;
+    transition: opacity .2s, background .2s;
+    z-index: 100;
+    font-family: ui-monospace, 'SF Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .theme-toggle:hover { opacity: 1; background: var(--glass); }
 
   #presentation {
     position: relative;
@@ -108,101 +131,17 @@
   /* Presentation slides (not chat) render inside a card */
   .slide.pres-slide {
     inset: 40px;
-    background: #0a0a1a;
-    border: 1px solid rgba(80,80,255,0.08);
+    background: var(--bg-secondary);
+    border: 1px solid var(--card-border);
     border-radius: 24px;
     padding: 56px 64px;
     overflow-x: hidden;
     overflow-y: auto;
-  }
-  .slide.pres-slide::before {
-    content: '';
-    position: absolute;
-    top: -40%;
-    right: -20%;
-    width: 80%;
-    height: 100%;
-    background: radial-gradient(ellipse at center,
-      rgba(60,50,255,0.8) 0%,
-      rgba(80,60,255,0.5) 20%,
-      rgba(100,80,255,0.25) 40%,
-      rgba(60,40,200,0.08) 60%,
-      transparent 75%
-    );
-    filter: blur(50px);
-    pointer-events: none;
-    z-index: 0;
-    animation: blob-drift 12s ease-in-out infinite;
-  }
-  .slide.pres-slide::after {
-    content: '';
-    position: absolute;
-    bottom: -30%;
-    left: -20%;
-    width: 60%;
-    height: 70%;
-    background: radial-gradient(ellipse at center,
-      rgba(80,50,255,0.4) 0%,
-      rgba(60,40,220,0.2) 30%,
-      rgba(40,30,180,0.08) 50%,
-      transparent 70%
-    );
-    filter: blur(60px);
-    pointer-events: none;
-    z-index: 0;
-    animation: blob-drift-2 15s ease-in-out infinite;
+    container-type: inline-size;
   }
   .slide.pres-slide > * {
     position: relative;
     z-index: 1;
-  }
-  @keyframes blob-drift {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(-3%, 5%) scale(1.05); }
-    66% { transform: translate(2%, -3%) scale(0.97); }
-  }
-  @keyframes blob-drift-2 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    40% { transform: translate(4%, -3%) scale(1.03); }
-    70% { transform: translate(-2%, 4%) scale(0.98); }
-  }
-  .slide.pres-slide.slide-purple {
-    background: #0a0a1a;
-  }
-  .slide.pres-slide.slide-purple::before {
-    background: radial-gradient(ellipse at center,
-      rgba(108,92,231,0.9) 0%,
-      rgba(108,92,231,0.5) 20%,
-      rgba(155,143,255,0.25) 40%,
-      rgba(108,92,231,0.08) 60%,
-      transparent 75%
-    );
-  }
-  .slide.pres-slide.slide-purple::after {
-    background: radial-gradient(ellipse at center,
-      rgba(108,92,231,0.5) 0%,
-      rgba(80,60,200,0.25) 30%,
-      transparent 65%
-    );
-  }
-  .slide.pres-slide.slide-blue {
-    background: #0a0a1a;
-  }
-  .slide.pres-slide.slide-blue::before {
-    background: radial-gradient(ellipse at center,
-      rgba(0,100,255,0.8) 0%,
-      rgba(0,120,238,0.5) 20%,
-      rgba(0,170,255,0.25) 40%,
-      rgba(0,100,200,0.08) 60%,
-      transparent 75%
-    );
-  }
-  .slide.pres-slide.slide-blue::after {
-    background: radial-gradient(ellipse at center,
-      rgba(0,100,255,0.4) 0%,
-      rgba(0,80,200,0.2) 30%,
-      transparent 65%
-    );
   }
   .slide.active {
     opacity: 1;
@@ -221,32 +160,92 @@
   /* Full width inside the card */
   .pres-slide .slide-inner {
     max-width: 100%;
+    padding-top: 60px;
+    padding-bottom: 40px;
   }
+
+  /* ── Header Bar ── */
+  .slide-header {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 40px;
+    border-bottom: 1px solid var(--header-line);
+    z-index: 2;
+  }
+  .slide-header-wordmark {
+    font-family: 'Inter', sans-serif;
+    font-weight: 900;
+    font-style: italic;
+    font-size: 1.6cqi;
+    color: var(--text-primary);
+  }
+  .slide-header-name, .slide-header-date {
+    font-family: ui-monospace, 'SF Mono', monospace;
+    font-size: 0.95cqi;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-primary);
+  }
+
+  /* ── Footer Bar ── */
+  .slide-footer {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 40px;
+    z-index: 2;
+  }
+  .slide-footer-conf, .slide-footer-num {
+    font-family: ui-monospace, 'SF Mono', monospace;
+    font-size: 0.8cqi;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+  }
+
+  /* ── Section Divider colors ── */
+  .slide.section-cobalt { background: #3B42C4 !important; }
+  .slide.section-cobalt .slide-header { border-color: rgba(255,255,255,0.15); }
+  .slide.section-cobalt .slide-header *, .slide.section-cobalt .slide-footer * { color: rgba(255,255,255,0.7) !important; }
+
+  .slide.section-currant { background: #BC1E5D !important; }
+  .slide.section-currant .slide-header { border-color: rgba(255,255,255,0.15); }
+  .slide.section-currant .slide-header *, .slide.section-currant .slide-footer * { color: rgba(255,255,255,0.7) !important; }
+
+  .slide.section-amethyst { background: #7B34CE !important; }
+  .slide.section-amethyst .slide-header { border-color: rgba(255,255,255,0.15); }
+  .slide.section-amethyst .slide-header *, .slide.section-amethyst .slide-footer * { color: rgba(255,255,255,0.7) !important; }
 
   /* ── Section Dividers ── */
   .section-divider {
     text-align: left;
   }
   .section-number {
-    font-size: 13px;
+    font-family: ui-monospace, 'SF Mono', monospace;
+    font-size: 2cqi;
     font-weight: 600;
-    color: var(--purple);
+    color: rgba(255,255,255,0.7);
     letter-spacing: .1em;
     text-transform: uppercase;
     margin-bottom: 16px;
   }
   .section-title {
     font-family: 'Inter', sans-serif;
-    font-size: clamp(48px, 7vw, 80px);
+    font-size: 5cqi;
     font-weight: 800;
-    color: var(--text);
+    color: #FFFFFF;
     line-height: 1;
     letter-spacing: -.03em;
     margin-bottom: 20px;
   }
   .section-desc {
-    font-size: 17px;
-    color: var(--text-dim);
+    font-size: 1.6cqi;
+    color: rgba(255,255,255,0.6);
     max-width: 500px;
     line-height: 1.5;
   }
@@ -256,71 +255,71 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0;
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid var(--card-border);
     border-radius: 16px;
     overflow: hidden;
   }
   .ba-head {
-    font-size: 12px;
+    font-size: 1.2cqi;
     font-weight: 700;
     letter-spacing: .1em;
     text-transform: uppercase;
     padding: 16px 24px;
   }
   .ba-head-before {
-    background: rgba(255,255,255,0.03);
-    color: var(--text-dim);
-    border-right: 1px solid rgba(255,255,255,0.06);
+    background: var(--glass);
+    color: var(--text-muted);
+    border-right: 1px solid var(--card-border);
   }
   .ba-head-after {
-    background: rgba(155,143,255,0.06);
-    color: var(--purple);
+    background: rgba(255,0,255,0.06);
+    color: var(--accent-pink);
   }
   .ba-row {
     display: contents;
   }
   .ba-cell {
     padding: 18px 24px;
-    font-size: 16px;
+    font-size: 1.6cqi;
     line-height: 1.45;
-    border-top: 1px solid rgba(255,255,255,0.06);
+    border-top: 1px solid var(--card-border);
   }
   .ba-before {
-    color: var(--text-dim);
-    border-right: 1px solid rgba(255,255,255,0.06);
+    color: var(--text-muted);
+    border-right: 1px solid var(--card-border);
   }
   .ba-after {
-    color: var(--text);
+    color: var(--text-primary);
     font-weight: 500;
   }
 
   /* ── Image slides ── */
   .image-slide-label {
-    font-size: 13px;
+    font-size: 1.2cqi;
     font-weight: 600;
-    color: var(--purple);
+    color: var(--accent-pink);
     letter-spacing: .1em;
     text-transform: uppercase;
     margin-bottom: 12px;
   }
   .image-slide-title {
-    font-size: clamp(22px, 2.5vw, 30px);
+    font-size: 2cqi;
     font-weight: 600;
-    color: var(--text);
+    color: var(--text-primary);
     margin-bottom: 32px;
     line-height: 1.3;
   }
   .image-placeholder {
     width: 100%;
     border-radius: 16px;
-    border: 1px dashed rgba(255,255,255,0.12);
-    background: rgba(255,255,255,0.02);
+    border: 1px dashed var(--card-border);
+    background: var(--glass);
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 60px 40px;
-    color: var(--text-dim);
-    font-size: 14px;
+    color: var(--text-muted);
+    font-size: 1.2cqi;
     text-align: center;
     line-height: 1.5;
   }
@@ -360,73 +359,43 @@
   @keyframes float-med { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
   @keyframes float-subtle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
   @keyframes float-rotate { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-6px) rotate(0.5deg); } }
-  @keyframes glow-pulse { 0%, 100% { box-shadow: 0 0 60px rgba(108,92,231,0.12); } 50% { box-shadow: 0 0 100px rgba(108,92,231,0.22); } }
-  @keyframes glow-pulse-red { 0%, 100% { box-shadow: 0 0 60px rgba(255,59,48,0.12); } 50% { box-shadow: 0 0 100px rgba(255,59,48,0.22); } }
 
   /* ── Typography ── */
   .slide-heading {
     font-family: 'Inter', sans-serif;
-    font-size: clamp(32px, 4vw, 52px);
+    font-size: 4.5cqi;
     font-weight: 800;
-    color: var(--text);
+    color: var(--text-primary);
     margin-bottom: 8px;
     letter-spacing: -.02em;
     line-height: 1.05;
   }
   .slide-subheading {
-    font-size: clamp(15px, 1.8vw, 19px);
-    color: var(--text-dim);
+    font-size: 2cqi;
+    color: var(--text-secondary);
     margin-bottom: 44px;
     font-weight: 400;
     line-height: 1.5;
   }
   .label-sm {
-    font-size: 11px;
+    font-size: 1.2cqi;
     font-weight: 700;
     letter-spacing: .14em;
     text-transform: uppercase;
-    color: var(--text-dim);
+    color: var(--text-muted);
     margin-bottom: 12px;
   }
 
-  /* ── Slide 1: Title ── */
-  #slide-1 { text-align: center; }
-  #slide-1 .main-title {
+  /* ── Slide 1: Title (now only used on slide-2 title card) ── */
+  #slide-2 .main-title {
     font-family: 'Inter', sans-serif;
-    font-size: clamp(64px, 12vw, 130px);
+    font-size: 5cqi;
     font-weight: 800;
     letter-spacing: -.04em;
     line-height: .9;
     margin-bottom: 32px;
-    background: linear-gradient(135deg, #fff 0%, var(--purple) 50%, var(--blue-light) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--accent-pink);
     animation: float-rotate 5.5s ease-in-out infinite;
-  }
-  #slide-1 .subtitle {
-    font-size: clamp(16px, 2.2vw, 22px);
-    color: var(--text-dim);
-    font-weight: 400;
-    margin-bottom: 56px;
-    max-width: 500px;
-    line-height: 1.5;
-  }
-  #slide-1 .byline {
-    font-size: 12px;
-    color: rgba(255,255,255,0.2);
-    letter-spacing: .1em;
-    text-transform: uppercase;
-  }
-  #slide-1 .hint {
-    position: absolute;
-    bottom: 28px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 12px;
-    color: rgba(255,255,255,0.15);
-    letter-spacing: .12em;
-    animation: pulse 2.5s ease-in-out infinite;
   }
 
   /* ── Slide 2: Sources ── */
@@ -439,8 +408,8 @@
   .source-card {
     border-radius: 18px;
     padding: 28px 22px;
-    border: 1px solid rgba(255,255,255,0.06);
-    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--card-border);
+    background: var(--glass);
     transition: border-color .25s, transform .25s;
     animation: float-subtle 6s ease-in-out infinite;
   }
@@ -448,49 +417,49 @@
   .source-card:nth-child(2) { animation-delay: 0.6s; }
   .source-card:nth-child(3) { animation-delay: 1.2s; }
   .source-card:hover {
-    border-color: rgba(155,143,255,0.3);
+    border-color: rgba(255,0,255,0.3);
     transform: translateY(-3px);
   }
   .source-card-label {
-    font-size: 10px; font-weight: 800;
+    font-size: 1.2cqi; font-weight: 800;
     letter-spacing: .12em;
     text-transform: uppercase;
     margin-bottom: 14px;
   }
   .source-card-title {
-    font-size: 17px;
+    font-size: 1.6cqi;
     font-weight: 700;
     margin-bottom: 8px;
     line-height: 1.25;
   }
   .source-card-desc {
-    font-size: 13px;
-    color: var(--text-dim);
+    font-size: 1.2cqi;
+    color: var(--text-muted);
     line-height: 1.5;
   }
 
   /* ── Quote blocks ── */
   .quote-block {
-    font-size: clamp(22px, 3.2vw, 36px);
+    font-size: 2cqi;
     font-weight: 700;
     line-height: 1.35;
-    color: #fff;
+    color: var(--text-primary);
     margin: 28px 0 24px;
   }
   .quote-sub {
-    font-size: 15px;
-    color: rgba(255,255,255,0.5);
+    font-size: 1.6cqi;
+    color: var(--text-secondary);
     line-height: 1.6;
   }
   .quote-attribution {
-    font-size: 12px;
-    color: rgba(255,255,255,0.3);
+    font-size: 1.2cqi;
+    color: var(--text-muted);
     margin-top: 20px;
     font-style: italic;
   }
   .source-line {
-    font-size: 10px;
-    color: rgba(255,255,255,0.25);
+    font-size: 1.2cqi;
+    color: var(--text-muted);
     letter-spacing: .08em;
     text-transform: uppercase;
   }
@@ -507,31 +476,31 @@
     padding: 32px 28px;
   }
   .col-card.muted {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: var(--glass);
+    border: 1px solid var(--card-border);
   }
   .col-card.highlighted {
-    background: linear-gradient(160deg, rgba(108,92,231,0.2), rgba(155,143,255,0.08));
-    border: 1px solid rgba(155,143,255,0.25);
+    background: rgba(255,0,255,0.08);
+    border: 1px solid rgba(255,0,255,0.25);
   }
   .col-card h3 {
-    font-size: 12px; font-weight: 700;
+    font-size: 1.2cqi; font-weight: 700;
     text-transform: uppercase; letter-spacing: .12em;
     margin-bottom: 22px;
   }
-  .col-card.highlighted h3 { color: var(--purple); }
-  .col-card.muted h3 { color: var(--text-dim); }
+  .col-card.highlighted h3 { color: var(--accent-pink); }
+  .col-card.muted h3 { color: var(--text-muted); }
   .col-card ul {
     list-style: none;
     display: flex; flex-direction: column;
     gap: 14px;
-    font-size: 15px; line-height: 1.5;
-    color: var(--text-mid);
+    font-size: 1.6cqi; line-height: 1.5;
+    color: var(--text-secondary);
   }
-  .col-card.highlighted ul { color: rgba(255,255,255,0.8); }
+  .col-card.highlighted ul { color: var(--text-primary); }
   .col-label {
     text-align: right;
-    font-size: 12px; color: var(--purple);
+    font-size: 1.2cqi; color: var(--accent-pink);
     font-weight: 600; margin-top: 16px;
     font-style: italic;
     opacity: .7;
@@ -548,18 +517,15 @@
   .js-ready .points-list li { opacity: 0; transform: translateY(14px); }
   .js-ready .points-list li.visible { opacity: 1; transform: translateY(0); }
   .point-title {
-    font-size: clamp(17px, 2vw, 21px);
+    font-size: 1.6cqi;
     font-weight: 700; margin-bottom: 4px;
   }
   .point-title span {
-    background: linear-gradient(90deg, var(--purple), var(--blue-light));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--accent-pink);
   }
   .point-body {
-    font-size: clamp(14px, 1.5vw, 16px);
-    color: var(--text-dim); line-height: 1.5;
+    font-size: 1.6cqi;
+    color: var(--text-muted); line-height: 1.5;
   }
 
   /* ── Content Cards Grid ── */
@@ -574,7 +540,7 @@
   }
   .content-card {
     background: var(--card-bg);
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 1px solid var(--card-border);
     border-radius: 16px;
     padding: 24px;
     transition: opacity .4s, transform .4s;
@@ -588,17 +554,14 @@
     transform: translateY(0);
   }
   .content-card-title {
-    font-size: clamp(16px, 1.8vw, 20px);
+    font-size: 1.6cqi;
     font-weight: 700;
     margin-bottom: 8px;
-    background: linear-gradient(90deg, var(--purple), var(--blue-light));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--accent-pink);
   }
   .content-card-body {
-    font-size: clamp(13px, 1.4vw, 15px);
-    color: var(--text-dim);
+    font-size: 1.2cqi;
+    color: var(--text-muted);
     line-height: 1.55;
   }
 
@@ -609,7 +572,7 @@
     margin-bottom: 24px;
     position: relative;
     overflow: hidden;
-    animation: glow-pulse-red 4s ease-in-out infinite, float-slow 5s ease-in-out infinite;
+    animation: float-slow 5s ease-in-out infinite;
   }
   .research-hero::after {
     content: '';
@@ -620,20 +583,20 @@
     pointer-events: none;
   }
   .research-hero-eyebrow {
-    font-size: 10px; font-weight: 700;
+    font-size: 1.2cqi; font-weight: 700;
     letter-spacing: .14em;
     text-transform: uppercase;
     color: rgba(255,255,255,0.5);
     margin-bottom: 12px;
   }
   .research-hero-text {
-    font-size: clamp(18px, 2.4vw, 26px);
+    font-size: 2cqi;
     font-weight: 700; line-height: 1.35;
     margin-bottom: 12px;
     color: #fff;
   }
   .research-hero-source {
-    font-size: 10px; color: rgba(255,255,255,0.35);
+    font-size: 1.2cqi; color: rgba(255,255,255,0.35);
     font-style: italic;
   }
   .trend-grid {
@@ -643,28 +606,28 @@
   }
   .trend-card {
     padding: 22px 20px;
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 1px solid var(--card-border);
     border-radius: 16px;
-    background: rgba(255,255,255,0.02);
+    background: var(--glass);
     transition: opacity .4s, transform .4s;
   }
   .js-ready .trend-card { opacity: 0; transform: translateY(10px); }
   .js-ready .trend-card.visible { opacity: 1; transform: translateY(0); }
   .trend-card-title {
-    font-size: 15px; font-weight: 700;
-    margin-bottom: 6px; color: #fff;
+    font-size: 1.6cqi; font-weight: 700;
+    margin-bottom: 6px; color: var(--text-primary);
   }
   .trend-card-desc {
-    font-size: 13px;
-    color: var(--text-dim);
+    font-size: 1.2cqi;
+    color: var(--text-muted);
     line-height: 1.5;
   }
   .trend-source {
     display: inline-block;
     margin-top: 8px;
-    font-size: 9px; font-weight: 600;
-    color: var(--purple);
-    background: rgba(155,143,255,0.1);
+    font-size: 0.8cqi; font-weight: 600;
+    color: var(--accent-pink);
+    background: rgba(255,0,255,0.1);
     border-radius: 20px;
     padding: 2px 10px;
   }
@@ -677,10 +640,10 @@
     margin-top: 8px;
   }
   .pattern-card {
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 1px solid var(--card-border);
     border-radius: 16px;
     padding: 24px 20px;
-    background: rgba(255,255,255,0.02);
+    background: var(--card-bg);
     transition: border-color .25s, background .25s, transform .25s;
     cursor: default;
     animation: float-subtle 6s ease-in-out infinite;
@@ -692,18 +655,18 @@
   .pattern-card:nth-child(5) { animation-delay: 1.2s; }
   .pattern-card:nth-child(6) { animation-delay: 2.0s; }
   .pattern-card:hover {
-    border-color: rgba(155,143,255,0.3);
-    background: rgba(155,143,255,0.06);
+    border-color: rgba(255,0,255,0.3);
+    background: rgba(255,0,255,0.06);
     animation-play-state: paused;
     transform: translateY(-3px);
   }
   .pattern-name {
-    font-size: 15px; font-weight: 700;
-    margin-bottom: 8px; color: #fff;
+    font-size: 1.6cqi; font-weight: 700;
+    margin-bottom: 8px; color: var(--text-primary);
   }
   .pattern-desc {
-    font-size: 13px;
-    color: var(--text-dim);
+    font-size: 1.2cqi;
+    color: var(--text-muted);
     line-height: 1.5;
   }
 
@@ -717,8 +680,8 @@
   .own-card {
     border-radius: 18px;
     padding: 28px 22px;
-    border: 1px solid rgba(255,255,255,0.06);
-    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--card-border);
+    background: var(--glass);
     transition: border-color .25s, transform .25s;
     animation: float-med 5s ease-in-out infinite;
   }
@@ -726,81 +689,81 @@
   .own-card:nth-child(2) { animation-delay: 0.7s; }
   .own-card:nth-child(3) { animation-delay: 1.4s; }
   .own-card:hover {
-    border-color: rgba(155,143,255,0.3);
+    border-color: rgba(255,0,255,0.3);
     animation-play-state: paused;
     transform: translateY(-3px);
   }
   .own-card-label {
-    font-size: 10px; font-weight: 800;
+    font-size: 1.2cqi; font-weight: 800;
     letter-spacing: .14em;
     text-transform: uppercase;
     margin-bottom: 14px;
   }
-  .own-card-label.intention { color: var(--purple); }
-  .own-card-label.autonomy { color: var(--blue-light); }
-  .own-card-label.adaptation { color: var(--orange); }
+  .own-card-label.intention { color: var(--accent-pink); }
+  .own-card-label.autonomy { color: var(--accent-blue); }
+  .own-card-label.adaptation { color: var(--accent-orange); }
   .own-card-title {
-    font-size: clamp(16px, 1.8vw, 19px);
+    font-size: 1.6cqi;
     font-weight: 700;
     margin-bottom: 10px;
     line-height: 1.25;
   }
   .own-card-desc {
-    font-size: 13px;
-    color: var(--text-dim);
+    font-size: 1.2cqi;
+    color: var(--text-muted);
     line-height: 1.55;
   }
   .anchor-bar {
-    background: linear-gradient(135deg, rgba(108,92,231,0.12), rgba(0,102,255,0.08));
-    border-left: 3px solid var(--purple);
+    background: rgba(255,0,255,0.08);
+    border-left: 3px solid var(--accent-pink);
     border-radius: 0 14px 14px 0;
     padding: 20px 28px;
-    font-size: clamp(14px, 1.5vw, 16px);
+    font-size: 1.6cqi;
     line-height: 1.6;
-    color: var(--text-mid);
+    color: var(--text-secondary);
   }
-  .anchor-bar strong { color: var(--purple); font-weight: 700; }
+  .anchor-bar strong { color: var(--accent-pink); font-weight: 700; }
 
   /* ── Team Actions ── */
   .team-rows {
     display: flex; flex-direction: column;
     margin-top: 8px;
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 1px solid var(--card-border);
     border-radius: 18px;
     overflow: hidden;
   }
   .team-row {
     display: grid;
     grid-template-columns: 140px 1fr;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
+    border-bottom: 1px solid var(--card-border);
     transition: opacity .4s, transform .4s;
   }
   .js-ready .team-row { opacity: 0; transform: translateY(10px); }
   .js-ready .team-row.visible { opacity: 1; transform: translateY(0); }
   .team-row:last-child { border-bottom: none; }
   .team-context {
-    background: rgba(255,255,255,0.02);
-    font-size: 11px; font-weight: 700;
-    color: var(--text-dim);
+    background: var(--glass);
+    font-size: 1.2cqi; font-weight: 700;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: .08em;
     padding: 22px 20px;
     display: flex; align-items: center;
-    border-right: 1px solid rgba(255,255,255,0.04);
+    border-right: 1px solid var(--card-border);
   }
   .team-action {
     padding: 22px 26px;
-    font-size: clamp(14px, 1.5vw, 16px);
+    font-size: 1.6cqi;
     line-height: 1.5;
     display: flex; align-items: center;
-    color: var(--text-mid);
+    color: var(--text-secondary);
   }
-  .team-action strong { color: var(--purple); }
+  .team-action strong { color: var(--accent-pink); }
 
   /* ── Closing ── */
   #slide-15 { text-align: center; }
   .closing-quote {
-    font-size: clamp(22px, 3vw, 34px);
+    font-size: 2cqi;
     font-weight: 700;
     line-height: 1.45;
     color: #fff;
@@ -815,29 +778,29 @@
   }
   .closing-quote .word.visible { opacity: 1; transform: translateY(0); }
   .closing-quote-wrap {
-    border-left: 3px solid var(--purple);
-    border-right: 3px solid var(--purple);
+    border-left: 3px solid var(--accent-pink);
+    border-right: 3px solid var(--accent-pink);
     padding: 36px 48px;
-    background: linear-gradient(135deg, rgba(108,92,231,0.08), rgba(0,102,255,0.04));
+    background: rgba(255,0,255,0.06);
     border-radius: 18px;
     margin: 40px 0 40px;
     animation: float-slow 6s ease-in-out infinite;
   }
   .closing-thanks {
-    font-size: 16px;
-    color: var(--text-dim);
+    font-size: 1.6cqi;
+    color: var(--text-muted);
     margin-top: 8px;
   }
   .closing-accent {
     width: 60px; height: 3px;
-    background: linear-gradient(90deg, var(--purple), var(--blue-light));
+    background: var(--accent-pink);
     border-radius: 2px;
     margin: 28px auto 0;
   }
 
   /* ── Slide 1: AI Chat Interface ── */
   #slide-1 {
-    background: var(--bg);
+    background: var(--bg-primary);
     padding: 0;
   }
   #slide-1 .slide-inner {
@@ -851,21 +814,21 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
     border-radius: 10px;
     padding: 6px 16px;
     font-size: 14px;
     font-weight: 600;
-    color: var(--text-mid);
+    color: var(--text-secondary);
     margin-bottom: 28px;
   }
-  .chat-badge svg { flex-shrink: 0; stroke: var(--text-mid); }
+  .chat-badge svg { flex-shrink: 0; stroke: var(--text-secondary); }
   .chat-greeting {
     font-family: 'Inter', sans-serif;
     font-size: clamp(32px, 4vw, 40px);
     font-weight: 600;
-    color: var(--text);
+    color: var(--text-primary);
     letter-spacing: -.02em;
     line-height: 1.1;
     margin-bottom: 32px;
@@ -879,10 +842,10 @@
   }
   .chat-input-card {
     width: 100%;
-    background: rgba(255,255,255,0.05);
+    background: var(--glass);
     border-radius: 20px;
     border: 1px solid transparent;
-    background-image: linear-gradient(var(--bg), var(--bg)), linear-gradient(135deg, #EDE6FF, var(--purple), var(--purple-deep));
+    background-image: linear-gradient(var(--bg-primary), var(--bg-primary)), linear-gradient(135deg, rgba(255,0,255,0.3), var(--accent-pink), var(--accent-purple));
     background-origin: border-box;
     background-clip: padding-box, border-box;
     padding: 16px 20px 12px;
@@ -890,10 +853,10 @@
     flex-direction: column;
     gap: 12px;
     transition: box-shadow .3s;
-    box-shadow: 0 0 20px rgba(155,143,255,0.15), 0 0 60px rgba(108,92,231,0.08);
+    box-shadow: 0 0 20px rgba(255,0,255,0.15), 0 0 60px rgba(255,0,255,0.08);
   }
   .chat-input-card:focus-within {
-    box-shadow: 0 0 30px rgba(155,143,255,0.25), 0 0 80px rgba(108,92,231,0.12);
+    box-shadow: 0 0 30px rgba(255,0,255,0.25), 0 0 80px rgba(255,0,255,0.12);
   }
   .chat-input {
     width: 100%;
@@ -902,9 +865,9 @@
     outline: none;
     font-family: 'Inter', sans-serif;
     font-size: 16px;
-    color: #fff;
+    color: var(--text-primary);
     padding: 0;
-    caret-color: var(--purple);
+    caret-color: var(--accent-pink);
     line-height: 1.5;
     resize: none;
     overflow: hidden;
@@ -912,7 +875,7 @@
     max-height: 150px;
   }
   .chat-input::placeholder {
-    color: rgba(255,255,255,0.25);
+    color: var(--text-muted);
   }
   .chat-input-bottom {
     display: flex;
@@ -922,15 +885,15 @@
   .chat-plus-btn {
     width: 32px; height: 32px;
     border-radius: 50%;
-    border: 1.5px solid rgba(255,255,255,0.12);
+    border: 1.5px solid var(--glass-border);
     background: none;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer;
-    color: var(--text-dim);
+    color: var(--text-muted);
     font-size: 18px;
     transition: border-color .2s;
   }
-  .chat-plus-btn:hover { border-color: rgba(255,255,255,0.3); }
+  .chat-plus-btn:hover { border-color: var(--text-secondary); }
   .chat-right-controls {
     display: flex;
     align-items: center;
@@ -939,7 +902,7 @@
   .chat-model-select {
     font-size: 13px;
     font-weight: 500;
-    color: var(--text-dim);
+    color: var(--text-muted);
     display: flex;
     align-items: center;
     gap: 4px;
@@ -950,7 +913,7 @@
     width: 32px; height: 32px;
     border-radius: 50%;
     border: none;
-    background: var(--purple);
+    background: var(--accent-pink);
     display: flex; align-items: center; justify-content: center;
     cursor: pointer;
     color: #fff;
@@ -967,16 +930,16 @@
     background: none;
     border: none;
     cursor: pointer;
-    color: var(--text-dim);
+    color: var(--text-muted);
     padding: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: color .2s;
   }
-  .chat-mic-btn:hover { color: var(--text-mid); }
+  .chat-mic-btn:hover { color: var(--text-secondary); }
   .chat-voice-btn {
-    background: #fff;
+    background: var(--text-primary);
     border: none;
     cursor: pointer;
     width: 32px;
@@ -996,18 +959,18 @@
     align-items: center;
     gap: 8px;
     font-size: 13px;
-    color: var(--text-dim);
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text-muted);
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
     border-radius: 12px;
     padding: 10px 18px;
     cursor: pointer;
     transition: background .2s, border-color .2s, color .2s;
   }
   .chat-suggestion:hover {
-    background: rgba(155,143,255,0.08);
-    border-color: rgba(155,143,255,0.2);
-    color: var(--text-mid);
+    background: rgba(255,0,255,0.08);
+    border-color: rgba(255,0,255,0.2);
+    color: var(--text-secondary);
   }
   .chat-suggestion-icon {
     opacity: .4;
@@ -1033,7 +996,7 @@
     align-items: center;
     justify-content: flex-start;
     padding-top: calc(50vh - 220px);
-    background: var(--bg);
+    background: var(--bg-primary);
     opacity: 0;
     pointer-events: none;
     transition: opacity .4s;
@@ -1046,12 +1009,12 @@
     display: none;
   }
   @keyframes thinking-pulse {
-    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(108,92,231,0.3); }
-    50% { transform: scale(1.08); box-shadow: 0 0 40px 10px rgba(108,92,231,0.15); }
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,0,255,0.3); }
+    50% { transform: scale(1.08); box-shadow: 0 0 40px 10px rgba(255,0,255,0.15); }
   }
   .thinking-text {
     font-size: 13px;
-    color: var(--text-dim);
+    color: var(--text-muted);
     font-weight: 500;
     margin-bottom: 20px;
     letter-spacing: .06em;
@@ -1071,7 +1034,7 @@
     left: 0;
     font-size: clamp(18px, 2.4vw, 28px);
     font-weight: 500;
-    color: var(--text-mid);
+    color: var(--text-secondary);
     opacity: 0;
     width: 100%;
     line-height: 1.4;
@@ -1095,7 +1058,7 @@
   .thinking-dots span {
     width: 4px; height: 4px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.35);
+    background: var(--text-muted);
     animation: dot-bounce 1.4s ease-in-out infinite;
   }
   .thinking-dots span:nth-child(2) { animation-delay: .2s; }
@@ -1111,14 +1074,14 @@
     border: none;
     border-radius: 18px;
     padding: 12px 12px 4px;
-    background: rgba(255,255,255,0.02);
+    background: var(--glass);
     width: 100%;
     text-align: left;
   }
   .choice-question {
     font-size: 14px;
     font-weight: 600;
-    color: var(--text-dim);
+    color: var(--text-muted);
     margin-bottom: 6px;
     padding: 2px 4px;
   }
@@ -1149,50 +1112,49 @@
     transform: none;
   }
   .choice-option { flex-wrap: wrap; }
-  .choice-option:last-child { }
   .choice-option:hover {
-    background: rgba(255,255,255,0.04);
+    background: var(--glass);
   }
   .choice-option.focus {
-    background: rgba(155,143,255,0.08);
+    background: rgba(255,0,255,0.08);
   }
   .choice-num {
     width: 28px; height: 28px;
     border-radius: 8px;
-    background: rgba(255,255,255,0.06);
+    background: var(--glass);
     display: flex; align-items: center; justify-content: center;
     font-size: 13px; font-weight: 600;
-    color: var(--text-dim);
+    color: var(--text-muted);
     flex-shrink: 0;
   }
   .choice-option.focus .choice-num {
-    background: rgba(155,143,255,0.15);
-    color: var(--purple);
+    background: rgba(255,0,255,0.15);
+    color: var(--accent-pink);
   }
   .choice-label {
     flex: 1;
     font-size: 15px;
     font-weight: 500;
-    color: var(--text-mid);
+    color: var(--text-secondary);
     text-align: left;
   }
   .choice-option.focus .choice-label {
-    color: var(--text);
+    color: var(--text-primary);
   }
   .choice-desc {
     font-size: 12px;
-    color: var(--text-dim);
+    color: var(--text-muted);
     width: 100%;
     padding-left: 38px;
     margin-top: -2px;
     order: 3;
   }
   .choice-option.focus .choice-desc {
-    color: rgba(255,255,255,0.5);
+    color: var(--text-secondary);
   }
   .choice-arrow {
     font-size: 14px;
-    color: var(--text-dim);
+    color: var(--text-muted);
     opacity: 0;
     transition: opacity .2s;
     order: 2;
@@ -1209,7 +1171,7 @@
     gap: 8px;
     margin-top: 16px;
     font-size: 12px;
-    color: rgba(255,255,255,0.2);
+    color: var(--text-muted);
     opacity: 0;
     transition: opacity .4s;
   }
@@ -1229,27 +1191,27 @@
     opacity: 1;
   }
   .choice-skip-btn {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
     border-radius: 8px;
     padding: 6px 16px;
     font-size: 13px;
     font-weight: 500;
-    color: var(--text-dim);
+    color: var(--text-muted);
     cursor: pointer;
     transition: background .2s, color .2s;
     font-family: 'Inter', sans-serif;
     margin-left: auto;
   }
   .choice-skip-btn:hover {
-    background: rgba(255,255,255,0.1);
-    color: var(--text-mid);
+    background: var(--glass-border);
+    color: var(--text-secondary);
   }
   .choice-response {
     margin-top: 24px;
     font-size: clamp(16px, 1.8vw, 20px);
     font-weight: 500;
-    color: var(--text-mid);
+    color: var(--text-secondary);
     line-height: 1.5;
     opacity: 0;
     transform: translateY(8px);
@@ -1276,13 +1238,13 @@
   }
   .chat-msg-user {
     align-self: flex-end;
-    background: rgba(255,255,255,0.08);
+    background: var(--glass-border);
     border-radius: 18px;
     padding: 12px 22px;
     font-family: 'Inter', sans-serif;
     font-size: 15px;
     font-weight: 400;
-    color: var(--text);
+    color: var(--text-primary);
     opacity: 0;
     transform: translateY(8px);
     transition: opacity .4s, transform .4s;
@@ -1307,7 +1269,7 @@
     font-family: 'Inter', sans-serif;
     font-size: clamp(17px, 1.8vw, 20px);
     font-weight: 500;
-    color: var(--text-mid);
+    color: var(--text-secondary);
     line-height: 1.55;
     margin-bottom: 20px;
   }
@@ -1388,7 +1350,7 @@
   .thinking-text-inline {
     font-size: 13px;
     font-weight: 500;
-    color: var(--text-dim);
+    color: var(--text-muted);
     letter-spacing: .06em;
     text-transform: uppercase;
     margin-bottom: 16px;
@@ -1412,7 +1374,7 @@
     left: 0;
     font-size: clamp(16px, 1.6vw, 18px);
     font-weight: 500;
-    color: var(--text-mid);
+    color: var(--text-secondary);
     width: 100%;
     line-height: 1.5;
     opacity: 0;
@@ -1424,15 +1386,15 @@
   .thinking-step-inline .typed-text { display: inline; }
   .think-highlight {
     text-decoration: underline;
-    text-decoration-color: var(--purple);
+    text-decoration-color: var(--accent-pink);
     text-underline-offset: 4px;
     text-decoration-thickness: 2px;
-    color: var(--text);
+    color: var(--text-primary);
   }
   .thinking-text-inline.done .thinking-dots { display: none; }
   .chat-ai-icon {
     font-size: 18px;
-    color: var(--purple);
+    color: var(--accent-pink);
     margin-bottom: 12px;
   }
   .chat-agenda {
@@ -1456,29 +1418,29 @@
   .chat-agenda-num {
     width: 24px; height: 24px;
     border-radius: 7px;
-    background: rgba(155,143,255,0.1);
+    background: rgba(255,0,255,0.1);
     display: flex; align-items: center; justify-content: center;
     font-size: 12px; font-weight: 700;
-    color: var(--purple);
+    color: var(--accent-pink);
     flex-shrink: 0;
     margin-top: 1px;
   }
   .chat-agenda-title {
     font-size: 15px;
     font-weight: 600;
-    color: var(--text);
+    color: var(--text-primary);
     margin-bottom: 2px;
   }
   .chat-agenda-desc {
     font-size: 13px;
-    color: var(--text-dim);
+    color: var(--text-muted);
     line-height: 1.4;
   }
   .chat-ai-followup {
     font-family: 'Inter', sans-serif;
     font-size: clamp(17px, 1.8vw, 20px);
     font-weight: 500;
-    color: var(--text);
+    color: var(--text-primary);
     opacity: 0;
     transition: opacity .4s;
   }
@@ -1488,7 +1450,7 @@
   .chat-ai-subtext {
     font-size: 15px;
     font-weight: 400;
-    color: var(--text-dim);
+    color: var(--text-muted);
     line-height: 1.5;
     margin-bottom: 24px;
   }
@@ -1503,14 +1465,14 @@
   .typing-indicator span {
     width: 6px; height: 6px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.25);
+    background: var(--text-muted);
     animation: dot-bounce 1.4s ease-in-out infinite;
   }
   .typing-indicator span:nth-child(2) { animation-delay: .2s; }
   .typing-indicator span:nth-child(3) { animation-delay: .4s; }
   .chat-ai-direction-followup {
     font-size: 14px;
-    color: var(--text-dim);
+    color: var(--text-muted);
     margin-top: 4px;
   }
 
@@ -1521,12 +1483,12 @@
     gap: 0;
     margin-bottom: 20px;
     padding: 8px 32px;
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid var(--glass-border);
     border-radius: 16px;
   }
   .direction-card {
     padding: 24px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid var(--card-border);
     opacity: 0;
     transform: translateY(6px);
     transition: opacity 1.2s ease, transform 1.2s ease;
@@ -1541,22 +1503,19 @@
     transform: none;
   }
   .direction-card.show:hover .direction-card-title {
-    background: linear-gradient(135deg, #EDE6FF, var(--purple));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--accent-pink);
   }
   .direction-card-title {
     font-family: 'Inter', sans-serif;
     font-size: clamp(26px, 3vw, 32px);
     font-weight: 600;
-    color: var(--text);
+    color: var(--text-primary);
     margin-bottom: 6px;
     line-height: 1.2;
   }
   .direction-card-desc {
     font-size: 15px;
-    color: rgba(255,255,255,0.3);
+    color: var(--text-muted);
     line-height: 1.5;
   }
 
@@ -1572,9 +1531,9 @@
   .source-chip {
     font-size: 12px;
     font-weight: 500;
-    color: var(--text-dim);
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text-muted);
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
     border-radius: 8px;
     padding: 5px 12px;
     display: inline-flex;
@@ -1587,10 +1546,10 @@
   }
 
   .confirm-card {
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid var(--glass-border);
     border-radius: 18px;
     padding: 12px;
-    background: rgba(255,255,255,0.02);
+    background: var(--glass);
     width: 100%;
     text-align: left;
     opacity: 0;
@@ -1616,9 +1575,9 @@
     align-items: flex-start;
     gap: 14px;
     padding: 14px 18px;
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 1px solid var(--card-border);
     border-radius: 14px;
-    background: rgba(255,255,255,0.02);
+    background: var(--glass);
     opacity: 0;
     transform: translateY(8px);
     transition: opacity .4s, transform .4s;
@@ -1630,22 +1589,22 @@
   .confirm-num {
     width: 26px; height: 26px;
     border-radius: 8px;
-    background: rgba(155,143,255,0.1);
+    background: rgba(255,0,255,0.1);
     display: flex; align-items: center; justify-content: center;
     font-size: 12px; font-weight: 700;
-    color: var(--purple);
+    color: var(--accent-pink);
     flex-shrink: 0;
     margin-top: 2px;
   }
   .confirm-label {
     font-size: 15px;
     font-weight: 600;
-    color: var(--text);
+    color: var(--text-primary);
     margin-bottom: 2px;
   }
   .confirm-desc {
     font-size: 13px;
-    color: var(--text-dim);
+    color: var(--text-muted);
     line-height: 1.4;
   }
   .confirm-actions {
@@ -1669,22 +1628,22 @@
     transition: background .2s, transform .2s;
   }
   .confirm-yes {
-    background: var(--purple);
+    background: var(--accent-pink);
     border: none;
     color: #fff;
   }
   .confirm-yes:hover {
-    background: var(--purple-deep);
+    background: var(--accent-purple);
     transform: scale(1.02);
   }
   .confirm-no {
     background: none;
-    border: 1px solid rgba(255,255,255,0.1);
-    color: var(--text-dim);
+    border: 1px solid var(--glass-border);
+    color: var(--text-muted);
   }
   .confirm-no:hover {
-    border-color: rgba(255,255,255,0.2);
-    color: var(--text-mid);
+    border-color: var(--text-secondary);
+    color: var(--text-secondary);
   }
 
   /* ── Build overlay ── */
@@ -1709,8 +1668,8 @@
   .build-content {
     width: 90%;
     max-width: 700px;
-    background: #141418;
-    border: 1px solid rgba(255,255,255,0.08);
+    background: var(--bg-secondary);
+    border: 1px solid var(--card-border);
     border-radius: 24px;
     padding: 48px 48px 40px;
     transform: scale(0.95);
@@ -1725,7 +1684,7 @@
     gap: 8px;
     font-size: 13px;
     font-weight: 500;
-    color: var(--text-dim);
+    color: var(--text-muted);
     letter-spacing: .06em;
     text-transform: uppercase;
     margin-bottom: 36px;
@@ -1739,7 +1698,7 @@
     font-family: 'Inter', sans-serif;
     font-size: clamp(22px, 2.5vw, 28px);
     font-weight: 600;
-    color: var(--text);
+    color: var(--text-primary);
     line-height: 1.25;
     opacity: 0;
     transform: translateY(6px);
@@ -1752,7 +1711,7 @@
   .build-ready {
     font-size: 15px;
     font-weight: 500;
-    color: var(--purple);
+    color: var(--accent-pink);
     margin-top: 36px;
     opacity: 0;
     transition: opacity .8s ease;
@@ -1767,7 +1726,7 @@
     align-items: center;
     gap: 10px;
     font-size: 15px;
-    color: var(--text-dim);
+    color: var(--text-muted);
     opacity: 0;
     transform: translateY(8px);
     transition: opacity .4s, transform .4s;
@@ -1785,7 +1744,7 @@
     to { transform: rotate(360deg); }
   }
   .choice-option.selected {
-    background: rgba(155,143,255,0.15);
+    background: rgba(255,0,255,0.15);
     transition: background .2s, transform .2s, opacity .4s;
   }
 
@@ -1796,7 +1755,7 @@
     .two-col, .three-col, .trend-grid, .source-cards { grid-template-columns: 1fr; }
     .patterns-grid { grid-template-columns: 1fr 1fr; }
     .team-row { grid-template-columns: 1fr; }
-    .team-context { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .team-context { border-right: none; border-bottom: 1px solid var(--card-border); }
   }
   @media (max-width: 480px) {
     .patterns-grid { grid-template-columns: 1fr; }
@@ -1806,9 +1765,9 @@
 <body>
 
 <div id="progress-bar"></div>
-<div id="counter">1 / 14</div>
 <button class="nav-btn" id="btn-prev" aria-label="Previous slide">&#8592;</button>
 <button class="nav-btn" id="btn-next" aria-label="Next slide">&#8594;</button>
+<button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">T</button>
 
 <div id="presentation">
 
@@ -1863,9 +1822,9 @@
             <div class="choice-sheet inline-choice" id="choice-sheet-1" style="display:none;">
               <div class="choice-question">Which side do you want to present?</div>
               <div class="choice-options">
-                <div class="choice-option" data-choice="with"><span class="choice-num">1</span><span class="choice-label">Designing with AI</span><span class="choice-arrow">↵</span></div>
-                <div class="choice-option" data-choice="for"><span class="choice-num">2</span><span class="choice-label">Designing for AI</span><span class="choice-arrow">↵</span></div>
-                <div class="choice-option" data-choice="else"><span class="choice-num" style="font-size:14px;">✎</span><span class="choice-label" style="color:var(--text-dim);">Something else</span><span class="choice-arrow">↵</span></div>
+                <div class="choice-option" data-choice="with"><span class="choice-num">1</span><span class="choice-label">Designing with AI</span><span class="choice-arrow">&#8629;</span></div>
+                <div class="choice-option" data-choice="for"><span class="choice-num">2</span><span class="choice-label">Designing for AI</span><span class="choice-arrow">&#8629;</span></div>
+                <div class="choice-option" data-choice="else"><span class="choice-num" style="font-size:14px;">&#9998;</span><span class="choice-label" style="color:var(--text-muted);">Something else</span><span class="choice-arrow">&#8629;</span></div>
               </div>
             </div>
           </div>
@@ -1909,8 +1868,8 @@
             <div class="choice-sheet inline-choice" id="confirm-card-inline" style="display:none;">
               <div class="choice-question">Does this structure work?</div>
               <div class="choice-options">
-                <div class="choice-option confirm-opt" data-confirm="yes"><span class="choice-num">1</span><span class="choice-label">Yes, build it</span><span class="choice-arrow">↵</span></div>
-                <div class="choice-option confirm-opt" data-confirm="adjust"><span class="choice-num">2</span><span class="choice-label">Let me adjust</span><span class="choice-arrow">↵</span></div>
+                <div class="choice-option confirm-opt" data-confirm="yes"><span class="choice-num">1</span><span class="choice-label">Yes, build it</span><span class="choice-arrow">&#8629;</span></div>
+                <div class="choice-option confirm-opt" data-confirm="adjust"><span class="choice-num">2</span><span class="choice-label">Let me adjust</span><span class="choice-arrow">&#8629;</span></div>
               </div>
             </div>
           </div>
@@ -1951,39 +1910,71 @@
 
   <!-- ── SLIDE 2: Title Card ── -->
   <section class="slide pres-slide" id="slide-2" data-slide="2">
+    <div class="slide-header" style="opacity:0">
+      <span class="slide-header-wordmark">Manychat</span>
+      <span class="slide-header-name">DESIGNING FOR AI</span>
+      <span class="slide-header-date">24TH MARCH 2026</span>
+    </div>
     <div class="slide-inner" style="text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center;">
       <h1 class="main-title" style="animation: float-rotate 5.5s ease-in-out infinite;">Designing<br>for AI</h1>
-      <p style="font-size:clamp(15px, 1.8vw, 19px); color:var(--text-dim); margin-bottom:48px; letter-spacing:.02em;">What's shifting &nbsp;·&nbsp; What to design for &nbsp;·&nbsp; What we own now</p>
-      <p style="font-size:13px; color:rgba(255,255,255,0.2); letter-spacing:.1em; text-transform:uppercase;">Dajung Cho &nbsp;·&nbsp; Manychat &nbsp;·&nbsp; 30 min</p>
+      <p style="font-size:2cqi; color:var(--text-secondary); margin-bottom:48px; letter-spacing:.02em;">What's shifting &nbsp;·&nbsp; What to design for &nbsp;·&nbsp; What we own now</p>
+      <p style="font-size:1.2cqi; color:var(--text-muted); letter-spacing:.1em; text-transform:uppercase;">Dajung Cho &nbsp;·&nbsp; Manychat &nbsp;·&nbsp; 30 min</p>
+    </div>
+    <div class="slide-footer">
+      <span class="slide-footer-conf">PRIVILEGED & CONFIDENTIAL</span>
+      <span class="slide-footer-num">2</span>
     </div>
   </section>
 
   <!-- ══ SLIDE 3: Part 1 divider ══ -->
-  <section class="slide pres-slide" id="slide-3" data-slide="3">
+  <section class="slide pres-slide section-cobalt" id="slide-3" data-slide="3">
+    <div class="slide-header">
+      <span class="slide-header-wordmark">Manychat</span>
+      <span class="slide-header-name">DESIGNING FOR AI</span>
+      <span class="slide-header-date">24TH MARCH 2026</span>
+    </div>
     <div class="slide-inner section-divider">
       <div class="section-number">Part 1 of 3</div>
       <div class="section-title">What<br>changed</div>
       <div class="section-desc">Why the rules we learned don't fully apply anymore.</div>
     </div>
+    <div class="slide-footer">
+      <span class="slide-footer-conf">PRIVILEGED & CONFIDENTIAL</span>
+      <span class="slide-footer-num">3</span>
+    </div>
   </section>
 
   <!-- ══ SLIDE 4: This is not theoretical ══ -->
   <section class="slide pres-slide" id="slide-4" data-slide="4">
+    <div class="slide-header">
+      <span class="slide-header-wordmark">Manychat</span>
+      <span class="slide-header-name">DESIGNING FOR AI</span>
+      <span class="slide-header-date">24TH MARCH 2026</span>
+    </div>
     <div class="slide-inner" style="display:flex; gap:40px; align-items:center;">
       <div style="flex:0 0 40%;">
         <h2 class="slide-heading">This is not theoretical</h2>
         <p class="slide-subheading">Same question, three different AI products. Three different answers.</p>
       </div>
       <div style="flex:1; display:flex; flex-direction:column; gap:10px;">
-        <img src="Determinism is gone.1.png" style="width:100%; border-radius:12px; border:1px solid rgba(255,255,255,0.08);">
-        <img src="Determinism is gone.2.png" style="width:100%; border-radius:12px; border:1px solid rgba(255,255,255,0.08);">
-        <img src="Determinism is gone.3.png" style="width:100%; border-radius:12px; border:1px solid rgba(255,255,255,0.08);">
+        <img src="Determinism is gone.1.png" style="width:100%; border-radius:12px; border:1px solid var(--card-border);">
+        <img src="Determinism is gone.2.png" style="width:100%; border-radius:12px; border:1px solid var(--card-border);">
+        <img src="Determinism is gone.3.png" style="width:100%; border-radius:12px; border:1px solid var(--card-border);">
       </div>
+    </div>
+    <div class="slide-footer">
+      <span class="slide-footer-conf">PRIVILEGED & CONFIDENTIAL</span>
+      <span class="slide-footer-num">4</span>
     </div>
   </section>
 
   <!-- ══ SLIDE 5: The shift is already here ══ -->
   <section class="slide pres-slide" id="slide-5" data-slide="5">
+    <div class="slide-header">
+      <span class="slide-header-wordmark">Manychat</span>
+      <span class="slide-header-name">DESIGNING FOR AI</span>
+      <span class="slide-header-date">24TH MARCH 2026</span>
+    </div>
     <div class="slide-inner" style="display:flex; gap:40px; align-items:center;">
       <div style="flex:0 0 40%;">
         <h2 class="slide-heading">The shift is already here</h2>
@@ -1991,19 +1982,28 @@
       </div>
       <div style="flex:1; position:relative; min-height:300px;">
         <div id="slide6-before" style="transition: opacity 0.6s ease, transform 0.6s ease;">
-          <p class="label-sm" style="color:rgba(255,255,255,0.3); margin:0 0 8px 0;">Before: Flow builder</p>
-          <img src="Zapier classic.png" style="width:100%; border-radius:12px; border:1px solid rgba(255,255,255,0.08);">
+          <p class="label-sm" style="color:var(--text-muted); margin:0 0 8px 0;">Before: Flow builder</p>
+          <img src="Zapier classic.png" style="width:100%; border-radius:12px; border:1px solid var(--card-border);">
         </div>
         <div id="slide6-after" style="position:absolute; top:0; left:0; width:100%; opacity:0; transform:translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease;">
-          <p class="label-sm" style="color:rgba(255,255,255,0.3); margin:0 0 8px 0;">Now: AI agent</p>
-          <img src="zapier AI native.png" style="width:100%; border-radius:12px; border:1px solid rgba(255,255,255,0.08);">
+          <p class="label-sm" style="color:var(--text-muted); margin:0 0 8px 0;">Now: AI agent</p>
+          <img src="zapier AI native.png" style="width:100%; border-radius:12px; border:1px solid var(--card-border);">
         </div>
       </div>
+    </div>
+    <div class="slide-footer">
+      <span class="slide-footer-conf">PRIVILEGED & CONFIDENTIAL</span>
+      <span class="slide-footer-num">5</span>
     </div>
   </section>
 
   <!-- ══ SLIDE 6: What broke ══ -->
   <section class="slide pres-slide" id="slide-6" data-slide="6">
+    <div class="slide-header">
+      <span class="slide-header-wordmark">Manychat</span>
+      <span class="slide-header-name">DESIGNING FOR AI</span>
+      <span class="slide-header-date">24TH MARCH 2026</span>
+    </div>
     <div class="slide-inner" style="display:flex; flex-direction:column; justify-content:center; height:100%;">
       <h2 class="slide-heading">What broke</h2>
       <p class="slide-subheading">These are the assumptions I had to unlearn.</p>
@@ -2026,84 +2026,129 @@
         </div>
       </div>
     </div>
+    <div class="slide-footer">
+      <span class="slide-footer-conf">PRIVILEGED & CONFIDENTIAL</span>
+      <span class="slide-footer-num">6</span>
+    </div>
   </section>
 
   <!-- ══ SLIDE 7: The real risk ══ -->
-  <section class="slide pres-slide slide-purple" id="slide-7" data-slide="7">
+  <section class="slide pres-slide section-currant" id="slide-7" data-slide="7">
+    <div class="slide-header">
+      <span class="slide-header-wordmark">Manychat</span>
+      <span class="slide-header-name">DESIGNING FOR AI</span>
+      <span class="slide-header-date">24TH MARCH 2026</span>
+    </div>
     <div class="slide-inner" style="display:flex; flex-direction:column; justify-content:center; text-align:center;">
       <p class="label-sm" style="color:rgba(255,255,255,0.4); margin-bottom:32px;">A question for the room</p>
-      <div style="font-size:clamp(28px, 4vw, 44px); font-weight:700; color:#fff; line-height:1.25; margin-bottom:40px; max-width:700px; margin-left:auto; margin-right:auto;">
+      <div style="font-size:4.5cqi; font-weight:700; color:#fff; line-height:1.25; margin-bottom:40px; max-width:700px; margin-left:auto; margin-right:auto;">
         What happens when AI sends the wrong message to a customer and nobody notices?
       </div>
       <div id="slide8-answer" style="opacity:0; transform:translateY(12px); transition: opacity 0.6s ease, transform 0.6s ease; max-width:600px; margin:0 auto;">
-        <p style="font-size:clamp(17px, 2vw, 20px); color:rgba(255,255,255,0.6); line-height:1.6;">
+        <p style="font-size:2cqi; color:rgba(255,255,255,0.6); line-height:1.6;">
           The user blames Manychat. Not the AI. Us.<br>That concern is what started this work.
         </p>
       </div>
     </div>
+    <div class="slide-footer">
+      <span class="slide-footer-conf">PRIVILEGED & CONFIDENTIAL</span>
+      <span class="slide-footer-num">7</span>
+    </div>
   </section>
 
   <!-- ══ SLIDE 8: Fundamentals survive ══ -->
-  <section class="slide pres-slide slide-blue" id="slide-8" data-slide="8">
+  <section class="slide pres-slide section-cobalt" id="slide-8" data-slide="8">
+    <div class="slide-header">
+      <span class="slide-header-wordmark">Manychat</span>
+      <span class="slide-header-name">DESIGNING FOR AI</span>
+      <span class="slide-header-date">24TH MARCH 2026</span>
+    </div>
     <div class="slide-inner" style="display:flex; flex-direction:column; justify-content:center; text-align:center;">
       <p class="label-sm" style="color:rgba(255,255,255,0.4); margin-bottom:24px;">But here's what I keep coming back to</p>
-      <div style="font-size:clamp(32px, 4vw, 48px); font-weight:700; color:#fff; line-height:1.2; margin-bottom:24px;">
+      <div style="font-size:4.5cqi; font-weight:700; color:#fff; line-height:1.2; margin-bottom:24px;">
         Fundamentals survive.
       </div>
-      <p style="font-size:18px; color:rgba(255,255,255,0.6); line-height:1.6; max-width:500px; margin:0 auto;">
+      <p style="font-size:2cqi; color:rgba(255,255,255,0.6); line-height:1.6; max-width:500px; margin:0 auto;">
         Problem framing. Product sense. Judgment. Taste.<br>Tools change weekly. These don't.
       </p>
+    </div>
+    <div class="slide-footer">
+      <span class="slide-footer-conf">PRIVILEGED & CONFIDENTIAL</span>
+      <span class="slide-footer-num">8</span>
     </div>
   </section>
 
   <!-- ══ SLIDE 9: Part 2 divider ══ -->
-  <section class="slide pres-slide" id="slide-9" data-slide="9">
+  <section class="slide pres-slide section-currant" id="slide-9" data-slide="9">
+    <div class="slide-header">
+      <span class="slide-header-wordmark">Manychat</span>
+      <span class="slide-header-name">DESIGNING FOR AI</span>
+      <span class="slide-header-date">24TH MARCH 2026</span>
+    </div>
     <div class="slide-inner section-divider">
       <div class="section-number">Part 2 of 3</div>
       <div class="section-title">What to<br>design for</div>
       <div class="section-desc">What we've been building since last year. Research, patterns, and the AI playbook taking shape at Manychat.</div>
     </div>
+    <div class="slide-footer">
+      <span class="slide-footer-conf">PRIVILEGED & CONFIDENTIAL</span>
+      <span class="slide-footer-num">9</span>
+    </div>
   </section>
 
   <!-- ══ SLIDE 10: The spectrum ══ -->
   <section class="slide pres-slide" id="slide-10" data-slide="10">
+    <div class="slide-header">
+      <span class="slide-header-wordmark">Manychat</span>
+      <span class="slide-header-name">DESIGNING FOR AI</span>
+      <span class="slide-header-date">24TH MARCH 2026</span>
+    </div>
     <div class="slide-inner">
       <h2 class="slide-heading">Where we are, where we're going</h2>
       <p class="slide-subheading">Four paradigms. Each one changes what designers do.</p>
       <div style="display:flex; gap:2px; margin-top:16px;">
-        <div style="flex:1; background:var(--card-bg); border-radius:16px 0 0 16px; padding:20px; border:1px solid rgba(255,255,255,0.06); border-right:none;">
-          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:rgba(255,255,255,0.25); margin-bottom:10px;">Where we are</div>
-          <div style="font-size:clamp(15px, 1.6vw, 18px); font-weight:700; color:#fff; margin-bottom:8px;">Rule-based</div>
-          <div style="font-size:13px; color:var(--text-dim); line-height:1.5; margin-bottom:12px;">"If someone says pricing, send this message." The business owner builds every path. AI does exactly what it's told.</div>
-          <div style="font-size:12px; padding:6px 10px; background:rgba(255,255,255,0.04); border-radius:8px; color:rgba(255,255,255,0.35);">Designer designs <strong style="color:rgba(255,255,255,0.6);">screens</strong></div>
+        <div style="flex:1; background:var(--card-bg); border-radius:16px 0 0 16px; padding:20px; border:1px solid var(--card-border); border-right:none;">
+          <div style="font-size:1.2cqi; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); margin-bottom:10px;">Where we are</div>
+          <div style="font-size:1.6cqi; font-weight:700; color:var(--text-primary); margin-bottom:8px;">Rule-based</div>
+          <div style="font-size:1.2cqi; color:var(--text-muted); line-height:1.5; margin-bottom:12px;">"If someone says pricing, send this message." The business owner builds every path. AI does exactly what it's told.</div>
+          <div style="font-size:1.2cqi; padding:6px 10px; background:var(--glass); border-radius:8px; color:var(--text-muted);">Designer designs <strong style="color:var(--text-secondary);">screens</strong></div>
         </div>
-        <div style="flex:1; background:var(--card-bg); padding:20px; border:1px solid rgba(255,255,255,0.06); border-right:none; border-left:none;">
-          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:rgba(255,255,255,0.25); margin-bottom:10px;">Emerging</div>
-          <div style="font-size:clamp(15px, 1.6vw, 18px); font-weight:700; color:#fff; margin-bottom:8px;">AI-assisted</div>
-          <div style="font-size:13px; color:var(--text-dim); line-height:1.5; margin-bottom:12px;">AI suggests: "People who ask about pricing usually ask about shipping next." The human still decides. AI makes them faster.</div>
-          <div style="font-size:12px; padding:6px 10px; background:rgba(255,255,255,0.04); border-radius:8px; color:rgba(255,255,255,0.35);">Designer designs <strong style="color:rgba(255,255,255,0.6);">suggestions</strong></div>
+        <div style="flex:1; background:var(--card-bg); padding:20px; border:1px solid var(--card-border); border-right:none; border-left:none;">
+          <div style="font-size:1.2cqi; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); margin-bottom:10px;">Emerging</div>
+          <div style="font-size:1.6cqi; font-weight:700; color:var(--text-primary); margin-bottom:8px;">AI-assisted</div>
+          <div style="font-size:1.2cqi; color:var(--text-muted); line-height:1.5; margin-bottom:12px;">AI suggests: "People who ask about pricing usually ask about shipping next." The human still decides. AI makes them faster.</div>
+          <div style="font-size:1.2cqi; padding:6px 10px; background:var(--glass); border-radius:8px; color:var(--text-muted);">Designer designs <strong style="color:var(--text-secondary);">suggestions</strong></div>
         </div>
-        <div style="flex:1; background:var(--card-bg); padding:20px; border:1px solid rgba(255,255,255,0.06); border-right:none; border-left:none;">
-          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:rgba(108,92,231,0.6); margin-bottom:10px;">Building now</div>
-          <div style="font-size:clamp(15px, 1.6vw, 18px); font-weight:700; color:#fff; margin-bottom:8px;">Agentic</div>
-          <div style="font-size:13px; color:var(--text-dim); line-height:1.5; margin-bottom:12px;">AI notices a customer asked about a product, checks inventory, personalizes the response, and sends it. At 3am. Without asking.</div>
-          <div style="font-size:12px; padding:6px 10px; background:rgba(255,255,255,0.04); border-radius:8px; color:rgba(255,255,255,0.35);">Designer designs <strong style="color:rgba(255,255,255,0.6);">the guardrails</strong></div>
+        <div style="flex:1; background:var(--card-bg); padding:20px; border:1px solid var(--card-border); border-right:none; border-left:none;">
+          <div style="font-size:1.2cqi; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent-pink); margin-bottom:10px;">Building now</div>
+          <div style="font-size:1.6cqi; font-weight:700; color:var(--text-primary); margin-bottom:8px;">Agentic</div>
+          <div style="font-size:1.2cqi; color:var(--text-muted); line-height:1.5; margin-bottom:12px;">AI notices a customer asked about a product, checks inventory, personalizes the response, and sends it. At 3am. Without asking.</div>
+          <div style="font-size:1.2cqi; padding:6px 10px; background:var(--glass); border-radius:8px; color:var(--text-muted);">Designer designs <strong style="color:var(--text-secondary);">the guardrails</strong></div>
         </div>
-        <div style="flex:1; background:var(--card-bg); border-radius:0 16px 16px 0; padding:20px; border:1px solid rgba(255,255,255,0.06); border-left:none;">
-          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:rgba(255,59,48,0.6); margin-bottom:10px;">Next</div>
-          <div style="font-size:clamp(15px, 1.6vw, 18px); font-weight:700; color:#fff; margin-bottom:8px;">AI-native</div>
-          <div style="font-size:13px; color:var(--text-dim); line-height:1.5; margin-bottom:12px;">User types: "Handle pricing questions for my store." AI generates the entire flow. The interface isn't a builder anymore. It's a prompt.</div>
-          <div style="font-size:12px; padding:6px 10px; background:rgba(255,255,255,0.04); border-radius:8px; color:rgba(255,255,255,0.35);">Designer designs <strong style="color:rgba(255,255,255,0.6);">the conversation</strong></div>
+        <div style="flex:1; background:var(--card-bg); border-radius:0 16px 16px 0; padding:20px; border:1px solid var(--card-border); border-left:none;">
+          <div style="font-size:1.2cqi; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent-orange); margin-bottom:10px;">Next</div>
+          <div style="font-size:1.6cqi; font-weight:700; color:var(--text-primary); margin-bottom:8px;">AI-native</div>
+          <div style="font-size:1.2cqi; color:var(--text-muted); line-height:1.5; margin-bottom:12px;">User types: "Handle pricing questions for my store." AI generates the entire flow. The interface isn't a builder anymore. It's a prompt.</div>
+          <div style="font-size:1.2cqi; padding:6px 10px; background:var(--glass); border-radius:8px; color:var(--text-muted);">Designer designs <strong style="color:var(--text-secondary);">the conversation</strong></div>
         </div>
       </div>
       <div style="margin-top:16px; text-align:center;">
-        <p style="font-size:13px; color:rgba(255,255,255,0.2); letter-spacing:0.02em;">Generative AI powers all of this. It's the engine. These are the design paradigms we build around it.</p>
+        <p style="font-size:1.2cqi; color:var(--text-muted); letter-spacing:0.02em;">Generative AI powers all of this. It's the engine. These are the design paradigms we build around it.</p>
       </div>
+    </div>
+    <div class="slide-footer">
+      <span class="slide-footer-conf">PRIVILEGED & CONFIDENTIAL</span>
+      <span class="slide-footer-num">10</span>
     </div>
   </section>
 
   <!-- ══ SLIDE 11: Research ══ -->
   <section class="slide pres-slide" id="slide-11" data-slide="11">
+    <div class="slide-header">
+      <span class="slide-header-wordmark">Manychat</span>
+      <span class="slide-header-name">DESIGNING FOR AI</span>
+      <span class="slide-header-date">24TH MARCH 2026</span>
+    </div>
     <div class="slide-inner">
       <h2 class="slide-heading">What research is telling us</h2>
       <p class="slide-subheading">What I've learned from research, conferences, and building AI features.</p>
@@ -2130,38 +2175,65 @@
         </div>
       </div>
     </div>
+    <div class="slide-footer">
+      <span class="slide-footer-conf">PRIVILEGED & CONFIDENTIAL</span>
+      <span class="slide-footer-num">11</span>
+    </div>
   </section>
 
   <!-- ══ SLIDE 12: AI Playbook ══ -->
   <section class="slide pres-slide" id="slide-12" data-slide="12">
+    <div class="slide-header">
+      <span class="slide-header-wordmark">Manychat</span>
+      <span class="slide-header-name">DESIGNING FOR AI</span>
+      <span class="slide-header-date">24TH MARCH 2026</span>
+    </div>
     <div class="slide-inner" style="display:flex; flex-direction:column; justify-content:center; text-align:center;">
-      <p class="label-sm" style="color:rgba(255,255,255,0.4); margin-bottom:24px;">What we're doing about it</p>
-      <div style="font-size:clamp(28px, 3.5vw, 42px); font-weight:700; color:#fff; line-height:1.25; margin-bottom:16px;">
+      <p class="label-sm" style="color:var(--text-muted); margin-bottom:24px;">What we're doing about it</p>
+      <div style="font-size:4.5cqi; font-weight:700; color:var(--text-primary); line-height:1.25; margin-bottom:16px;">
         This started as a workshop.<br>Now it's a playbook.
       </div>
-      <p style="font-size:clamp(16px, 1.8vw, 19px); color:rgba(255,255,255,0.5); line-height:1.6; max-width:600px; margin:0 auto 32px;">
+      <p style="font-size:2cqi; color:var(--text-secondary); line-height:1.6; max-width:600px; margin:0 auto 32px;">
         Nick, Martin and I ran a pattern workshop last year to map what we were seeing across AI products. Hugo took everything and built it into a living design playbook.
       </p>
       <div>
-        <a href="https://hugocostamc.github.io/claude/aidesignplaybook/" target="_blank" style="display:inline-flex; align-items:center; gap:10px; background:rgba(108,92,231,0.15); border:1px solid rgba(108,92,231,0.3); border-radius:12px; padding:14px 24px; color:#9B8FFF; font-size:16px; font-weight:600; text-decoration:none; transition: background 0.2s;">
+        <a href="https://hugocostamc.github.io/claude/aidesignplaybook/" target="_blank" style="display:inline-flex; align-items:center; gap:10px; background:rgba(255,0,255,0.12); border:1px solid rgba(255,0,255,0.3); border-radius:12px; padding:14px 24px; color:var(--accent-pink); font-size:1.6cqi; font-weight:600; text-decoration:none; transition: background 0.2s;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           Open the AI Design Playbook
         </a>
       </div>
     </div>
+    <div class="slide-footer">
+      <span class="slide-footer-conf">PRIVILEGED & CONFIDENTIAL</span>
+      <span class="slide-footer-num">12</span>
+    </div>
   </section>
 
   <!-- ══ SLIDE 13: Part 3 divider ══ -->
-  <section class="slide pres-slide" id="slide-13" data-slide="13">
+  <section class="slide pres-slide section-amethyst" id="slide-13" data-slide="13">
+    <div class="slide-header">
+      <span class="slide-header-wordmark">Manychat</span>
+      <span class="slide-header-name">DESIGNING FOR AI</span>
+      <span class="slide-header-date">24TH MARCH 2026</span>
+    </div>
     <div class="slide-inner section-divider">
       <div class="section-number">Part 3 of 3</div>
       <div class="section-title">What changes<br>now</div>
       <div class="section-desc">The Manychat questions we need to answer. Starting this quarter.</div>
     </div>
+    <div class="slide-footer">
+      <span class="slide-footer-conf">PRIVILEGED & CONFIDENTIAL</span>
+      <span class="slide-footer-num">13</span>
+    </div>
   </section>
 
   <!-- ══ SLIDE 14: What we're doing ══ -->
   <section class="slide pres-slide" id="slide-14" data-slide="14">
+    <div class="slide-header">
+      <span class="slide-header-wordmark">Manychat</span>
+      <span class="slide-header-name">DESIGNING FOR AI</span>
+      <span class="slide-header-date">24TH MARCH 2026</span>
+    </div>
     <div class="slide-inner">
       <h2 class="slide-heading">What's not being designed right now</h2>
       <p class="slide-subheading">These problems exist today at Manychat. Nobody owns them yet.</p>
@@ -2184,41 +2256,63 @@
         </div>
       </div>
     </div>
+    <div class="slide-footer">
+      <span class="slide-footer-conf">PRIVILEGED & CONFIDENTIAL</span>
+      <span class="slide-footer-num">14</span>
+    </div>
   </section>
 
   <!-- ══ SLIDE 15: Discussion ══ -->
-  <section class="slide pres-slide slide-purple" id="slide-15" data-slide="15">
+  <section class="slide pres-slide section-amethyst" id="slide-15" data-slide="15">
+    <div class="slide-header">
+      <span class="slide-header-wordmark">Manychat</span>
+      <span class="slide-header-name">DESIGNING FOR AI</span>
+      <span class="slide-header-date">24TH MARCH 2026</span>
+    </div>
     <div class="slide-inner" style="text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center;">
       <p class="label-sm" style="color:rgba(255,255,255,0.4); margin-bottom:24px;">One question to leave with</p>
-      <div style="font-size:clamp(28px, 4vw, 44px); font-weight:600; color:#fff; line-height:1.25; margin-bottom:36px; max-width:700px;">
+      <div style="font-size:4.5cqi; font-weight:600; color:#fff; line-height:1.25; margin-bottom:36px; max-width:700px;">
         If the flow builder disappears tomorrow, what would you design instead?
       </div>
-      <p style="font-size:18px; color:rgba(255,255,255,0.5); line-height:1.6; margin-bottom:20px; max-width:550px;">
+      <p style="font-size:2cqi; color:rgba(255,255,255,0.5); line-height:1.6; margin-bottom:20px; max-width:550px;">
         You watched AI build this presentation in real time. That's not the future. That's today. The question is what we do with it.
       </p>
-      <p style="font-size:16px; color:rgba(255,255,255,0.35); line-height:1.6;">
+      <p style="font-size:1.6cqi; color:rgba(255,255,255,0.35); line-height:1.6;">
         Let's talk.
       </p>
+    </div>
+    <div class="slide-footer">
+      <span class="slide-footer-conf">PRIVILEGED & CONFIDENTIAL</span>
+      <span class="slide-footer-num">15</span>
     </div>
   </section>
 
   <!-- ══ SLIDE 16: Feedback ══ -->
   <section class="slide pres-slide" id="slide-16" data-slide="16">
+    <div class="slide-header">
+      <span class="slide-header-wordmark">Manychat</span>
+      <span class="slide-header-name">DESIGNING FOR AI</span>
+      <span class="slide-header-date">24TH MARCH 2026</span>
+    </div>
     <div class="slide-inner" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
-      <p class="label-sm" style="color:rgba(255,255,255,0.4); margin-bottom:24px;">Thank you</p>
-      <div style="font-size:clamp(24px, 3vw, 36px); font-weight:700; color:#fff; line-height:1.3; margin-bottom:12px;">
+      <p class="label-sm" style="color:var(--text-muted); margin-bottom:24px;">Thank you</p>
+      <div style="font-size:4.5cqi; font-weight:700; color:var(--text-primary); line-height:1.3; margin-bottom:12px;">
         Was this helpful?
       </div>
-      <p style="font-size:16px; color:rgba(255,255,255,0.4); margin-bottom:36px;">Your feedback helps me make these better.</p>
+      <p style="font-size:1.6cqi; color:var(--text-secondary); margin-bottom:36px;">Your feedback helps me make these better.</p>
       <div style="display:flex; gap:16px;">
-        <button id="fb-up" onclick="document.getElementById('fb-up').style.background='rgba(108,92,231,0.3)';document.getElementById('fb-up').style.borderColor='rgba(108,92,231,0.5)';document.getElementById('fb-msg').style.opacity='1';document.getElementById('fb-msg').style.transform='translateY(0)';" style="display:flex; align-items:center; gap:10px; padding:16px 32px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; color:#fff; font-size:18px; cursor:pointer; transition: all 0.3s;">
+        <button id="fb-up" onclick="document.getElementById('fb-up').style.background='rgba(255,0,255,0.2)';document.getElementById('fb-up').style.borderColor='rgba(255,0,255,0.4)';document.getElementById('fb-msg').style.opacity='1';document.getElementById('fb-msg').style.transform='translateY(0)';" style="display:flex; align-items:center; gap:10px; padding:16px 32px; background:var(--glass); border:1px solid var(--card-border); border-radius:14px; color:var(--text-primary); font-size:18px; cursor:pointer; transition: all 0.3s;">
           <span style="font-size:24px;">&#128077;</span> Yes
         </button>
-        <button id="fb-down" onclick="document.getElementById('fb-down').style.background='rgba(255,255,255,0.08)';document.getElementById('fb-down').style.borderColor='rgba(255,255,255,0.2);';document.getElementById('fb-msg').textContent='Thanks. I\'ll improve it.';document.getElementById('fb-msg').style.opacity='1';document.getElementById('fb-msg').style.transform='translateY(0)';" style="display:flex; align-items:center; gap:10px; padding:16px 32px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; color:#fff; font-size:18px; cursor:pointer; transition: all 0.3s;">
+        <button id="fb-down" onclick="document.getElementById('fb-down').style.background='var(--glass)';document.getElementById('fb-down').style.borderColor='var(--card-border)';document.getElementById('fb-msg').textContent='Thanks. I\'ll improve it.';document.getElementById('fb-msg').style.opacity='1';document.getElementById('fb-msg').style.transform='translateY(0)';" style="display:flex; align-items:center; gap:10px; padding:16px 32px; background:var(--glass); border:1px solid var(--card-border); border-radius:14px; color:var(--text-primary); font-size:18px; cursor:pointer; transition: all 0.3s;">
           <span style="font-size:24px;">&#128078;</span> Not really
         </button>
       </div>
-      <p id="fb-msg" style="margin-top:24px; font-size:16px; color:rgba(108,92,231,0.8); opacity:0; transform:translateY(8px); transition: opacity 0.4s ease, transform 0.4s ease;">Thanks for the feedback.</p>
+      <p id="fb-msg" style="margin-top:24px; font-size:1.6cqi; color:var(--accent-pink); opacity:0; transform:translateY(8px); transition: opacity 0.4s ease, transform 0.4s ease;">Thanks for the feedback.</p>
+    </div>
+    <div class="slide-footer">
+      <span class="slide-footer-conf">PRIVILEGED & CONFIDENTIAL</span>
+      <span class="slide-footer-num">16</span>
     </div>
   </section>
 
@@ -2229,7 +2323,6 @@
   let current = 1;
   let isAnimating = false;
 
-  const counter = document.getElementById('counter');
   const progressBar = document.getElementById('progress-bar');
   const btnPrev = document.getElementById('btn-prev');
   const btnNext = document.getElementById('btn-next');
@@ -2240,7 +2333,6 @@
 
   function updateProgress() {
     progressBar.style.width = ((current / TOTAL) * 100) + '%';
-    counter.textContent = current + ' / ' + TOTAL;
   }
 
   function triggerSlideAnimations(slideEl, slideNum) {
@@ -2356,6 +2448,21 @@
   });
   btnNext.addEventListener('click', () => goTo(current + 1));
   btnPrev.addEventListener('click', () => goTo(current - 1));
+
+  // Theme toggle
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 't' || e.key === 'T') {
+      if (document.activeElement.tagName === 'TEXTAREA') return;
+      const html = document.documentElement;
+      const current_theme = html.getAttribute('data-theme') || 'dark';
+      html.setAttribute('data-theme', current_theme === 'dark' ? 'light' : 'dark');
+    }
+  });
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const html = document.documentElement;
+    const current_theme = html.getAttribute('data-theme') || 'dark';
+    html.setAttribute('data-theme', current_theme === 'dark' ? 'light' : 'dark');
+  });
 
   let touchStartX = 0;
   document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
